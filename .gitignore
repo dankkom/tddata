@@ -5,3 +5,4 @@ dist
 *.csv
 *.egg-info
 *.vscode
+.coverage
