@@ -23,7 +23,7 @@ This package comes with a Command - Line Interface(CLI) that makes downloading T
 The syntax is as follows:
 
 ```
-td-download {bond_name} {year}[-o|--output OUTPUT/DIRECTORY/PATH]
+td-download {bond_name} {year} [-o|--output OUTPUT/DIRECTORY/PATH]
 ```
 
 ### 2.2 The `tddata` Python package
