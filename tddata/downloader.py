@@ -105,7 +105,7 @@ def download_file(url: str, dest: str, create_path: bool = True) -> int:
 
 @lru_cache(maxsize=100)
 def get_metadata(
-        url: str = "https://sisweb.tesouro.gov.br/apex/f?p=2031:2:0::::"
+        url: str = "http://sisweb.tesouro.gov.br/apex/f?p=2031:2:0:::::"
 ) -> dict:
     """Returns metadata listing all URLs to download bonds' data files
 
