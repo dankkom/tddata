@@ -5,9 +5,7 @@ tddata - easy brazilian bonds daily prices data from Tesouro Direto
 """
 
 
-__author__ = "Daniel Komesu"
-__author_email__ = "danielkomesu@gmail.com"
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "download",
