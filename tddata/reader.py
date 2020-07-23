@@ -52,7 +52,7 @@ def _get_row_data(row: list, datemode: int) -> tuple:
     row = tuple(c.value for c in row if c.value != "")
     if isinstance(row[0], float):  # Date cell
         dtr = datetime.datetime(*xlrd.xldate_as_tuple(row[0], datemode))
-    elif isinstance(row[0], str):  # Text cell
+    else:  # Text cell
         dtr = datetime.datetime.strptime(row[0], "%d/%m/%Y")
     return tuple((dtr, *row[1:]))
 
