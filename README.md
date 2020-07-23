@@ -1,5 +1,7 @@
 # tddata - easly download & read brazilian Tesouro Direto's data
 
+![GitHub](https://img.shields.io/github/license/dkkomesu/tddata?style=flat-square) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dkkomesu/tddata/tests?style=flat-square) ![Coveralls github](https://img.shields.io/coveralls/github/dkkomesu/tddata?style=flat-square)
+
 tddata is a simple Python package to download and read Brazil's bonds data from Tesouro Direto program.
 
 ## 1. Install
