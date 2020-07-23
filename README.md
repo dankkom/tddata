@@ -6,14 +6,10 @@ tddata is a simple Python package to download and read Brazil's bonds data from 
 
 ## 1. Install
 
-Clone this repository and pip install.
-
-As simple as that! :)
+`pip install` it! As simple as that! :)
 
 ```shell
-git clone https://github.com/dkkomesu/tddata
-cd tddata
-pip install tddata
+pip install git+https://github.com/dkkomesu/tddata#egg=tddata
 ```
 
 ## 2. Usage
@@ -113,4 +109,4 @@ See LICENSE to see the full text.
 
 ---
 
-Data Source: all data are downloaded from [STN]("https://sisweb.tesouro.gov.br/apex/f?p=2031:2:0::::").
+Data Source: all data are downloaded from [STN]("http://sisweb.tesouro.gov.br/apex/f?p=2031:2:0:::::").
