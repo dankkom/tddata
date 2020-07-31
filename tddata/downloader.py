@@ -144,8 +144,8 @@ def get_metadata(
             year = int(child.get_text().strip(" -"))
         if child.name == "a":
             name = child.get_text()
-            url = urljoin(url, child.attrs["href"])
+            item_url = urljoin(url, child.attrs["href"])
             if name not in meta:
                 meta.update({name: {}})
-            meta[name].update({year: url})
+            meta[name].update({year: item_url})
     return meta
