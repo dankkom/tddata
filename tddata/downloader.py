@@ -3,6 +3,7 @@
 
 from functools import lru_cache
 import json
+import logging
 import os
 from pkg_resources import resource_filename
 from urllib.parse import urljoin
@@ -11,12 +12,16 @@ from bs4 import BeautifulSoup
 import requests
 
 
+logger = logging.getLogger(__name__)
+
+
 bonds_path = resource_filename(
     "tddata",
     "bonds.json",
 )
 with open(bonds_path, "r", encoding="utf-8") as f:
     BONDS = json.load(f)
+    logger.debug("Loaded bonds.json")
 
 
 def download(
@@ -40,6 +45,10 @@ def download(
         KeyError: If arguments bond_name or year aren't valid or not listed in
             TD's web page
     """
+    logger.info(
+        f"Starting download:\n  bond_name: {bond_name}\n  year: {year}\n"
+        f"  dest_path: {dest_path}\n  meta_url: {meta_url}"
+    )
     # Validate parameters
     if bond_name not in BONDS["metadata"]:
         raise KeyError(f"Invalid bond_name '{bond_name}'")
@@ -89,6 +98,10 @@ def download_file(url: str, dest: str, create_path: bool = True) -> int:
     Returns:
         int: Size in bytes of downloaded content
     """
+    logger.info(
+        f"Downloading file:\n  url: {url}\n  dest: {dest}\n"
+        f"  create_path: {create_path}"
+    )
     r = requests.get(url)
     file_size = int(r.headers["Content-Length"])
     if create_path:
@@ -117,6 +130,9 @@ def get_metadata(
         dict: Metadata dictionary, with the first level keys representing bonds'
             names, the second level keys are years (int).
     """
+    logger.info(
+        f"Getting metadata:\n  url: {url}"
+    )
     r = requests.get(url)
     soup = BeautifulSoup(r.text, "lxml")
     b = soup.select_one(".bl-body")

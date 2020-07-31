@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import os
 from pkg_resources import resource_filename
 
@@ -43,7 +44,26 @@ def set_parser():
         dest="output",
         default=os.path.join(os.path.expanduser("~"), "DATA"),
     )
+    parser.add_argument("--verbose", action="store_true", default=False)
     return parser
+
+
+def set_logger(verbose):
+    logger = logging.getLogger("tddata.downloader")
+    logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler("td-download.log")
+    if verbose:
+        fh.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    if verbose:
+        ch.setLevel(logging.DEBUG)
+    fmtter = logging.Formatter(
+        "%(asctime)s %(levelname)s %(message)s",
+    )
+    fh.setFormatter(fmtter)
+    ch.setFormatter(fmtter)
+    logger.addHandler(fh)
+    logger.addHandler(ch)
 
 
 def main():
@@ -51,5 +71,6 @@ def main():
     args = parser.parse_args()
     bond_name = normalize_bond_name(args.name)
     years = expand_years(args.years)
+    set_logger(args.verbose)
     for year in years:
         download(bond_name, year, args.output)
