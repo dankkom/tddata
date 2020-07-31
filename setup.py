@@ -25,7 +25,7 @@ description = "Easy Python data downloader & reader of brazilian Tesouro Direto"
 with open("README.md", "r") as f:
     long_description = f.read()
 
-url = "https://github.com/dkkomesu/tddata"
+url = "https://github.com/dankkom/tddata"
 
 package_data = {
     "tddata": [

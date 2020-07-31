@@ -9,7 +9,7 @@ tddata is a simple Python package to download and read Brazil's bonds data from 
 `pip install` it! As simple as that! :)
 
 ```shell
-pip install git+https://github.com/dkkomesu/tddata#egg=tddata
+pip install git+https://github.com/dankkom/tddata#egg=tddata
 ```
 
 ## 2. Usage
