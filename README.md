@@ -99,7 +99,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-![Chart showing LTN daily rates](plots/plot1.png)
+![Chart showing LTN daily rates](https://github.com/dkkomesu/tddata/raw/master/plots/plot1.png)
 
 ## 4. License
 
