@@ -60,6 +60,7 @@ setuptools.setup(
     author_email="contact@dkko.me",
     description=description,
     long_description=long_description,
+    long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     package_data=package_data,
     install_requires=install_requires,
