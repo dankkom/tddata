@@ -42,9 +42,9 @@ def download(
     """
     # Validate parameters
     if bond_name.upper() not in BONDS["metadata"]:
-        raise KeyError("Invalid bond_name %s", bond_name)
+        raise KeyError(f"Invalid bond_name '{bond_name}'")
     elif year < BONDS["metadata"][bond_name]["start-year"]:
-        raise KeyError("Invalid year %s", year)
+        raise KeyError(f"Invalid year '{year}'")
 
     # Get url from TD' web page, if not available raise KeyError
     try:
@@ -56,16 +56,13 @@ def download(
     except KeyError:
         if bond_name not in metadata:
             raise KeyError(
-                "Bond name %s not found in Tesouro Direto's web page: %s",
-                bond_name,
-                meta_url,
+                f"Bond name '{bond_name}' not found in Tesouro Direto's"
+                f"web page: '{meta_url}'"
             )
         elif year not in metadata[bond_name]:
             raise KeyError(
-                "Year %s of bond %s not found in Tesouro Direto's web page: %s",
-                year,
-                bond_name,
-                meta_url,
+                f"Year {year} of bond {bond_name} not found in Tesouro Direto's"
+                f" web page: {meta_url}"
             )
     # Start downloading file
     filename = f"{bond_name}_{year}.xls"
