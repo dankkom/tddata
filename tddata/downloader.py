@@ -41,7 +41,7 @@ def download(
             TD's web page
     """
     # Validate parameters
-    if bond_name.upper() not in BONDS["metadata"]:
+    if bond_name not in BONDS["metadata"]:
         raise KeyError(f"Invalid bond_name '{bond_name}'")
     elif year < BONDS["metadata"][bond_name]["start-year"]:
         raise KeyError(f"Invalid year '{year}'")
