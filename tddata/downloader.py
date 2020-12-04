@@ -56,12 +56,24 @@ def download(
         raise KeyError(f"Invalid year '{year}'")
 
     # Get url from TD' web page, if not available raise KeyError
+    if meta_url != "default":
+        metadata = get_metadata(meta_url)
+    else:
+        metadata = get_metadata()
     try:
-        if meta_url != "default":
-            metadata = get_metadata(meta_url)
-        else:
-            metadata = get_metadata()
         url = metadata[bond_name][year]
+        # Start downloading file
+        filename = f"{bond_name}_{year}.xls"
+        dest = os.path.join(dest_path, filename)
+        file_size = download_file(url=url, dest=dest, create_path=True)
+        return {
+            "bond_name": bond_name,
+            "year": year,
+            "url": url,
+            "filename": filename,
+            "destination": dest,
+            "file_size": file_size,
+        }
     except KeyError:
         if bond_name not in metadata:
             raise KeyError(
@@ -70,21 +82,9 @@ def download(
             )
         elif year not in metadata[bond_name]:
             raise KeyError(
-                f"Year {year} of bond {bond_name} not found in Tesouro Direto's"
-                f" web page: {meta_url}"
+                f"Year {year} of bond {bond_name} not found in "
+                f"Tesouro Direto's web page: {meta_url}"
             )
-    # Start downloading file
-    filename = f"{bond_name}_{year}.xls"
-    dest = os.path.join(dest_path, filename)
-    file_size = download_file(url=url, dest=dest, create_path=True)
-    return {
-        "bond_name": bond_name,
-        "year": year,
-        "url": url,
-        "filename": filename,
-        "destination": dest,
-        "file_size": file_size,
-    }
 
 
 def download_file(url: str, dest: str, create_path: bool = True) -> int:
