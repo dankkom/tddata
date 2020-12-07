@@ -1,4 +1,4 @@
-{
+BONDS = {
     "aliases": {
 
         "tesouro prefixado": "LTN",
@@ -59,5 +59,7 @@
         "PU Base Manhã": "BasePrice",
         "PU Extrato 9:00": "BasePrice"
     },
-    "description": "This JSON provides some metadata about bonds and other helping information."
+    "description": (
+        "This JSON provides some metadata about bonds and other helping "
+        "information."),
 }

@@ -2,26 +2,17 @@
 
 
 from functools import lru_cache
-import json
 import logging
 import os
-from pkg_resources import resource_filename
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 import requests
 
+from .bonds import BONDS
+
 
 logger = logging.getLogger(__name__)
-
-
-bonds_path = resource_filename(
-    "tddata",
-    "bonds.json",
-)
-with open(bonds_path, "r", encoding="utf-8") as f:
-    BONDS = json.load(f)
-    logger.debug("Loaded bonds.json")
 
 
 def download(

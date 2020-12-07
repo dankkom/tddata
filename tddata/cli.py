@@ -1,10 +1,9 @@
 import argparse
-import json
 import logging
 import os
-from pkg_resources import resource_filename
 
 from . import download
+from .bonds import BONDS
 
 
 def expand_years(args_years):
@@ -23,10 +22,7 @@ def expand_years(args_years):
 
 
 def normalize_bond_name(name):
-    path = resource_filename("tddata", "bonds.json")
-    with open(path, "r") as f:
-        bonds = json.load(f)
-    return bonds["aliases"][name.lower()]
+    return BONDS["aliases"][name.lower()]
 
 
 def set_parser():

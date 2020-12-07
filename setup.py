@@ -27,12 +27,6 @@ with open("README.md", "r") as f:
 
 url = "https://github.com/dankkom/tddata"
 
-package_data = {
-    "tddata": [
-        "bonds.json"
-    ],
-}
-
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.7",
@@ -47,10 +41,10 @@ entry_points = {
 }
 
 install_requires = [
-    "beautifulsoup4>=4.9.0",
-    "lxml>=4.5.0",
-    "pandas>=1.0.3",
-    "xlrd>=1.2.0",
+    "beautifulsoup4",
+    "lxml",
+    "pandas",
+    "xlrd",
     "requests",
 ]
 
@@ -65,7 +59,6 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
-    package_data=package_data,
     install_requires=install_requires,
     classifiers=classifiers,
     entry_points=entry_points,

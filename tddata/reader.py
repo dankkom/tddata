@@ -21,20 +21,12 @@ types:
 
 import datetime
 import itertools
-import json
 import os
-from pkg_resources import resource_filename
 
 import pandas as pd
 import xlrd
 
-
-bonds_path = resource_filename(
-    "tddata",
-    "bonds.json",
-)
-with open(bonds_path, "r", encoding="utf-8") as f:
-    BONDS = json.load(f)
+from .bonds import BONDS
 
 
 def _get_row_data(row: list, datemode: int) -> tuple:
