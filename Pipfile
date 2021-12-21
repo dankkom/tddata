@@ -11,8 +11,8 @@ twine = "*"
 
 [packages]
 beautifulsoup4 = "*"
-lxml = "*"
-numpy = "==1.19.3"
+lxml = ">=4.6.5"
+numpy = "*"
 pandas = "*"
 xlrd = "*"
 requests = "*"
