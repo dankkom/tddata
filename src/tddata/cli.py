@@ -2,7 +2,7 @@ import argparse
 import logging
 from pathlib import Path
 
-from . import download
+from . import downloader
 
 
 def set_parser():
@@ -41,4 +41,4 @@ def main():
     parser = set_parser()
     args = parser.parse_args()
     set_logger(args.verbose)
-    download(args.output)
+    downloader.download(args.output)
