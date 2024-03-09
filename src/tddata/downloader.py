@@ -7,7 +7,7 @@ from pathlib import Path
 import httpx
 from tqdm import tqdm
 
-from .constants import CSV_URL
+from .constants import CSV_URL, HTTP_HEADERS
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ def download(dest_dir: Path) -> dict:
     dest_dir.mkdir(parents=True, exist_ok=True)
 
     # Start downloading file
-    with httpx.stream("GET", CSV_URL) as r:
+    with httpx.stream("GET", CSV_URL, headers=HTTP_HEADERS) as r:
         r.raise_for_status()
 
         # Get file size from Content-Range: bytes 0-11611172/11611173
