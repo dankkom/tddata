@@ -1,10 +1,10 @@
 [project]
 name = "tddata"
-version = "0.1.3"
+version = "0.2.0"
 authors = [
-  { name="Daniel Komesu", email="danielkomesu@dkko.me" },
+  { name="Daniel Komesu", email="daniel@dkko.me" },
 ]
-description = "Easy Python data downloader & reader of brazilian Tesouro Direto"
+description = "Easly download & read brazilian Tesouro Direto's data"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
