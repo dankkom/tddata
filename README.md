@@ -6,11 +6,13 @@ tddata is a simple Python package to download and read Brazil's bonds data from 
 
 ## 1. Install
 
-`pip install` it! As simple as that! :)
+To install the package, you can use pip:
 
 ```shell
 pip install git+https://github.com/dankkom/tddata#egg=tddata
 ```
+
+Note that this package is not available on PyPI yet. You can install it directly from the GitHub repository, needing Git installed on your machine.
 
 ## 2. Usage
 
@@ -35,34 +37,23 @@ import tddata
 Before you start to work the data, you need to download it to your local machine.
 
 ```python
-# Download LFT bond data from years 2002-2020 and save at ~/DATA/TD/LFT
-# The file is saved with the following name pattern: {bond_name}_{year}.xls
-for year in range(2002, 2021):
-    tddata.download(bond_name="LFT", year=year, dest_path="~/DATA/TD/LFT")
+# Download Tesouro Direto's data and save at ./data/td/
+# The file is saved with the following name pattern: tesouro-direto_{last_modified:%Y%m%d%H%M}.csv
+tddata.download(dest_path="./data/")
 ```
 
-Now you can read the data. Because the data in these downloaded files aren't in a data scientist aware format, `tddata` provides functions to read it correctly.
+Now you can read the data.
 
-The most basic is `read_file()` that reads only one file at a time:
+You can use `read_file()` to read:
 
 ```python
-# Read data file of LFT bond from year 2019
-lft2019 = tddata.read_file("~/DATA/TD/LFT/LFT_2019.xls")
+# Read data file
+data = tddata.read_file("~/data/tesouro-direto_202403021021.csv")
 ```
 
-The functions `read_directory()` and `read_tree` reads an entire directory and an entire tree of directories respectively, returning all data in one Pandas DataFrame.
+## 3. Example
 
-```python
-# Read data directory
-lft = tddata.read_directory("~/DATA/TD/LFT")
-
-# Read data tree directory recursively
-td = tdtddata.read_tree("~/DATA/TD")
-```
-
-## 3. Examples
-
-In the example below we plot the daily yields of LTN bonds from 2016-01-01 to 2020-05-05
+In the example below we plot the daily yields of LTN bonds from 2022-01-01 to the latest date available in the data.
 
 ```python
 import matplotlib.pyplot as plt
