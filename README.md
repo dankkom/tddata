@@ -14,14 +14,14 @@ pip install git+https://github.com/dankkom/tddata#egg=tddata
 
 ## 2. Usage
 
-### 2.1 The `td-download` CLI utility
+### 2.1 The `tddata` CLI
 
 This package comes with a Command - Line Interface(CLI) that makes downloading Tesouro Direto's data easier.
 
 The syntax is as follows:
 
 ```
-td-download {bond_name} {year} [-o | --output OUTPUT/DIRECTORY/PATH]
+tddata {bond_name} {year} [-o | --output | --data-dir OUTPUT/DIRECTORY/PATH]
 ```
 
 ### 2.2 The `tddata` Python package
@@ -71,12 +71,12 @@ import seaborn as sns
 import tddata
 
 
-ltn = tddata.read_directory("/DATA/TD/LTN")
+ltn = tddata.reader.read("data/tesouro-direto_202403021021.csv")
 
 # Filter data by date and create a new column with the bond's year of maturity
-ltn = ltn[ltn["RefDate"] >= "2016-01-01"]
+ltn = ltn[ltn["reference_date"] >= "2016-01-01"]
 ltn = ltn.assign(
-	MaturityYear=ltn["RefDate"].dt.year,
+	maturity_year=ltn["reference_date"].dt.year,
 )
 
 # Now plot the data with matplotlib and seaborn
@@ -84,9 +84,9 @@ ltn = ltn.assign(
 f, ax = plt.subplots()
 f.set_size_inches(16, 8)
 sns.lineplot(
-	x="RefDate",
-	y="YieldSell",
-	hue="MaturityYear",
+	x="reference_date",
+	y="sell_yield",
+	hue="maturity_year",
 	ax=ax,
 	data=ltn,
 	palette="viridis",
@@ -94,12 +94,12 @@ sns.lineplot(
 )
 ax.set_title("LTN Daily Yield")
 ax.set_xlabel("Date")
-ax.set_ylabel("Yield")
+ax.set_ylabel("Sell Yield")
 plt.tight_layout()
 plt.show()
 ```
 
-![Chart showing LTN daily rates](https://github.com/dkkomesu/tddata/raw/master/plots/plot1.png)
+![Chart showing LTN daily rates](plots/plot1.png)
 
 ## 4. License
 
@@ -109,4 +109,4 @@ See LICENSE to see the full text.
 
 ---
 
-Data Source: all data are downloaded from [STN]("http://sisweb.tesouro.gov.br/apex/f?p=2031:2:0:::::").
+Data Source: all data are downloaded from [Tesouro Transparente/Secretaria do Tesouro Nacional](https://www.tesourotransparente.gov.br/ckan/dataset/taxas-dos-titulos-ofertados-pelo-tesouro-direto/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1).

@@ -23,28 +23,24 @@ def download(dest_dir: Path) -> dict:
         dict: metadata for logging and analysis
     """
 
-    url = CSV_URL
-
     dest_dir.mkdir(parents=True, exist_ok=True)
 
     # Start downloading file
-    with httpx.stream("GET", url) as r:
+    with httpx.stream("GET", CSV_URL) as r:
         r.raise_for_status()
 
         # Get file size from Content-Range: bytes 0-11611172/11611173
         file_size = int(r.headers["Content-Range"].split("/")[1])
 
-        # Get Last-Modified datetime. eg.: Sat, 02 Mar 2024 10:21:12 GMT
-        last_modified = r.headers["Last-Modified"]
-        last_modified = dt.datetime.strptime(last_modified, "%a, %d %b %Y %H:%M:%S %Z")
+        last_modified = get_last_modified(r)
 
-        filename = f"tesouro-direto_{last_modified:%Y%m%d%H%M}.csv"
+        filename = get_filename(last_modified)
         dest_filepath = dest_dir / filename
 
         if dest_filepath.exists():
             logger.info("File already exists: %s", dest_filepath)
             return {
-                "url": url,
+                "url": CSV_URL,
                 "filename": filename,
                 "destination": dest_filepath,
                 "file_size": file_size,
@@ -58,8 +54,21 @@ def download(dest_dir: Path) -> dict:
         progressbar.close()
 
     return {
-        "url": url,
+        "url": CSV_URL,
         "filename": filename,
         "destination": dest_filepath,
         "file_size": file_size,
     }
+
+
+def get_filename(last_modified: dt.datetime) -> str:
+    """Return a filename based on the last modified datetime"""
+    filename = f"tesouro-direto_{last_modified:%Y%m%d%H%M}.csv"
+    return filename
+
+
+def get_last_modified(response: httpx.Response) -> dt.datetime:
+    # Get Last-Modified datetime. eg.: Sat, 02 Mar 2024 10:21:12 GMT
+    last_modified = response.headers["Last-Modified"]
+    last_modified = dt.datetime.strptime(last_modified, "%a, %d %b %Y %H:%M:%S %Z")
+    return last_modified
