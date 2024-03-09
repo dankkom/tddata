@@ -71,31 +71,56 @@ import seaborn as sns
 import tddata
 
 
-ltn = tddata.reader.read("data/tesouro-direto_202403021021.csv")
+data = tddata.reader.read("data/tesouro-direto_202403021021.csv")
 
 # Filter data by date and create a new column with the bond's year of maturity
-ltn = ltn[ltn["reference_date"] >= "2016-01-01"]
+ltn = data[data["bond_name"] == "Tesouro Prefixado"]
+ltn = ltn[ltn["reference_date"] >= "2022-01-01"]
 ltn = ltn.assign(
-	maturity_year=ltn["reference_date"].dt.year,
+    maturity_year=ltn["reference_date"].dt.year,
 )
 
 # Now plot the data with matplotlib and seaborn
+
+# Set the style of the plot
+sns.set_theme(style="ticks")
+plt.rcParams["axes.labelsize"] = 8
+plt.rcParams["axes.titlesize"] = 12
+plt.rcParams["xtick.labelsize"] = 8
+plt.rcParams["ytick.labelsize"] = 8
+plt.rcParams["legend.fontsize"] = 8
+
 # With the hue argument we plot each year of maturity by a diferent lines and colors
-f, ax = plt.subplots()
-f.set_size_inches(16, 8)
+bond_tyle = "Tesouro Prefixado"
+f, ax = plt.subplots(figsize=(10, 5))
 sns.lineplot(
-	x="reference_date",
-	y="sell_yield",
-	hue="maturity_year",
-	ax=ax,
-	data=ltn,
-	palette="viridis",
+    data=data[data["bond_type"] == bond_tyle],
+    x="reference_date",
+    y="sell_yield",
+    hue="maturity_year",
+    estimator=None,
+    ax=ax,
+    palette="viridis",
     legend="full",
+    linewidth=1.5,
 )
-ax.set_title("LTN Daily Yield")
+ax.set_title(f"Tesouro Direto - {bond_tyle} - Daily Sell Yield")
 ax.set_xlabel("Date")
-ax.set_ylabel("Sell Yield")
-plt.tight_layout()
+ax.set_ylabel("Sell Yield (%)")
+# Legend position
+ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+# Grid off
+sns.despine(ax=ax)
+f.tight_layout()
+# Add text with the data source at the bottom left of the figure
+plt.figtext(
+    0.01,
+    0.01,
+    "Data source: Tesouro Direto",
+    horizontalalignment="left",
+    fontsize=8,
+    color="gray",
+)
 plt.show()
 ```
 
