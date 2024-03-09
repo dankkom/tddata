@@ -1,6 +1,6 @@
 import argparse
 import logging
-import os
+from pathlib import Path
 
 from . import download
 
@@ -10,8 +10,10 @@ def set_parser():
     parser.add_argument(
         "-o",
         "--output",
+        "--data-dir",
         dest="output",
-        default=os.path.join(os.path.expanduser("~"), "DATA"),
+        default=Path("data"),
+        type=Path,
     )
     parser.add_argument("--verbose", action="store_true", default=False)
     return parser
@@ -20,7 +22,7 @@ def set_parser():
 def set_logger(verbose):
     logger = logging.getLogger("tddata")
     logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler("td-download.log")
+    fh = logging.FileHandler("tddata.log")
     if verbose:
         fh.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

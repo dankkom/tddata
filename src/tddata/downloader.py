@@ -7,18 +7,10 @@ from pathlib import Path
 import httpx
 from tqdm import tqdm
 
+from .constants import CSV_URL
+
 
 logger = logging.getLogger(__name__)
-URL = (
-    "https://www.tesourotransparente.gov.br"
-    "/ckan"
-    "/dataset"
-    "/df56aa42-484a-4a59-8184-7676580c81e3"
-    "/resource"
-    "/796d2059-14e9-44e3-80c9-2d9e30b405c1"
-    "/download"
-    "/PrecoTaxaTesouroDireto.csv"
-)
 
 
 def download(dest_dir: Path) -> dict:
@@ -31,7 +23,7 @@ def download(dest_dir: Path) -> dict:
         dict: metadata for logging and analysis
     """
 
-    url = URL
+    url = CSV_URL
 
     dest_dir.mkdir(parents=True, exist_ok=True)
 
