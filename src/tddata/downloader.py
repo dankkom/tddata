@@ -1,16 +1,12 @@
 """Functions to download Tesouro Direto's historical data"""
 
 import datetime as dt
-import logging
 from pathlib import Path
 
 import httpx
 from tqdm import tqdm
 
 from .constants import CSV_URL, HTTP_HEADERS
-
-
-logger = logging.getLogger(__name__)
 
 
 def download(dest_dir: Path) -> dict:
@@ -38,7 +34,7 @@ def download(dest_dir: Path) -> dict:
         dest_filepath = dest_dir / filename
 
         if dest_filepath.exists():
-            logger.info("File already exists: %s", dest_filepath)
+            print("File already exists:", dest_filepath)
             return {
                 "url": CSV_URL,
                 "filename": filename,
