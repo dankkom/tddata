@@ -33,5 +33,5 @@ Homepage = "https://github.com/dankkom/tddata"
 Issues = "https://github.com/dankkom/tddata/issues"
 
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
