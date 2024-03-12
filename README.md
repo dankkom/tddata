@@ -39,7 +39,7 @@ Before you start to work the data, you need to download it to your local machine
 ```python
 # Download Tesouro Direto's data and save at ./data/td/
 # The file is saved with the following name pattern: tesouro-direto_{last_modified:%Y%m%d%H%M}.csv
-tddata.download(dest_path="./data/")
+tddata.downloader.download(dest_path="./data/")
 ```
 
 Now you can read the data.
@@ -48,7 +48,7 @@ You can use `read_file()` to read:
 
 ```python
 # Read data file
-data = tddata.read_file("~/data/tesouro-direto_202403021021.csv")
+data = tddata.reader.read_file("~/data/tesouro-direto_202403021021.csv")
 ```
 
 ## 3. Example
@@ -82,10 +82,10 @@ plt.rcParams["ytick.labelsize"] = 8
 plt.rcParams["legend.fontsize"] = 8
 
 # With the hue argument we plot each year of maturity by a diferent lines and colors
-bond_tyle = "Tesouro Prefixado"
+bond_type = "Tesouro Prefixado"
 f, ax = plt.subplots(figsize=(10, 5))
 sns.lineplot(
-    data=data[data["bond_type"] == bond_tyle],
+    data=data[data["bond_type"] == bond_type],
     x="reference_date",
     y="sell_yield",
     hue="maturity_year",
@@ -95,7 +95,7 @@ sns.lineplot(
     legend="full",
     linewidth=1.5,
 )
-ax.set_title(f"Tesouro Direto - {bond_tyle} - Daily Sell Yield")
+ax.set_title(f"Tesouro Direto - {bond_type} - Daily Sell Yield")
 ax.set_xlabel("Date")
 ax.set_ylabel("Sell Yield (%)")
 # Legend position
