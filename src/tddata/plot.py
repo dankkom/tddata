@@ -306,6 +306,28 @@ def plot_buybacks(data: pd.DataFrame, by_bond_type: bool = True):
     )
 
 
+def plot_maturities(data: pd.DataFrame, by_bond_type: bool = True):
+    """Plot maturities value over time."""
+    return _plot_value_over_time(
+        data,
+        date_col=Column.BUYBACK_DATE.value,  # Maturities file uses 'Data Resgate' -> BUYBACK_DATE/REDEMPTION_DATE
+        value_col=Column.VALUE.value,
+        title="Maturities Volume Over Time",
+        hue_col=Column.BOND_TYPE.value if by_bond_type else None,
+    )
+
+
+def plot_interest_coupons(data: pd.DataFrame, by_bond_type: bool = True):
+    """Plot interest coupons payments value over time."""
+    return _plot_value_over_time(
+        data,
+        date_col=Column.BUYBACK_DATE.value,  # Interest coupons file uses 'Data Resgate' similar to maturities
+        value_col=Column.VALUE.value,
+        title="Interest Coupons Payments Over Time",
+        hue_col=Column.BOND_TYPE.value if by_bond_type else None,
+    )
+
+
 def _plot_value_over_time(
     data: pd.DataFrame, date_col: str, value_col: str, title: str, hue_col: str = None
 ):

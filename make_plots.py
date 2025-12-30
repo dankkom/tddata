@@ -189,6 +189,34 @@ def run_buybacks():
     save_plot(fig, "buybacks_evolution_by_type.png")
 
 
+def run_maturities():
+    f = get_latest_file("vencimentos-do-tesouro-direto*.csv")
+    if not f:
+        print("No maturities file found.")
+        return
+
+    print(f"Loading maturities from {f.name}...")
+    data = reader.read_maturities(f)
+
+    print("  Plotting maturities by bond type...")
+    fig = plot.plot_maturities(data, by_bond_type=True)
+    save_plot(fig, "maturities_evolution_by_type.png")
+
+
+def run_interest_coupons():
+    f = get_latest_file("pagamento-de-cupom-de-juros-do-tesouro-direto*.csv")
+    if not f:
+        print("No interest coupons file found.")
+        return
+
+    print(f"Loading interest coupons from {f.name}...")
+    data = reader.read_interest_coupons(f)
+
+    print("  Plotting interest coupons by bond type...")
+    fig = plot.plot_interest_coupons(data, by_bond_type=True)
+    save_plot(fig, "interest_coupons_evolution_by_type.png")
+
+
 def main():
     print("Starting plot generation...")
     run_prices()
@@ -197,6 +225,8 @@ def main():
     run_operations()
     run_sales()
     run_buybacks()
+    run_maturities()
+    run_interest_coupons()
     print("Done!")
 
 
