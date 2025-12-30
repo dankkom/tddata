@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 
 from . import downloader
-from .constants import DATASET_PRICES_RATES, DATASET_OPERATIONS, DATASET_INVESTORS, DATASET_MINT_STOCK, DATASET_REDEMPTIONS, DATASET_SALES
+from .constants import DATASET_PRICES_RATES, DATASET_OPERATIONS, DATASET_INVESTORS, DATASET_MINT_STOCK, DATASET_BUYBACKS, DATASET_SALES
 
 
 def set_parser():
@@ -17,9 +17,9 @@ def set_parser():
     )
     parser.add_argument(
         "--dataset",
-        choices=["prices", "operations", "investors", "stock", "redemptions", "sales"],
+        choices=["prices", "operations", "investors", "stock", "buybacks", "sales"],
         default="prices",
-        help="Dataset to download: 'prices', 'operations', 'investors', 'stock', 'redemptions' or 'sales'"
+        help="Dataset to download: 'prices', 'operations', 'investors', 'stock', 'buybacks' or 'sales'"
     )
     parser.add_argument("--verbose", action="store_true", default=False)
     return parser
@@ -34,7 +34,7 @@ def main():
         "operations": DATASET_OPERATIONS,
         "investors": DATASET_INVESTORS,
         "stock": DATASET_MINT_STOCK,
-        "redemptions": DATASET_REDEMPTIONS,
+        "buybacks": DATASET_BUYBACKS,
         "sales": DATASET_SALES,
     }
 

@@ -54,7 +54,7 @@ DATASET_PRICES_RATES = "taxas-dos-titulos-ofertados-pelo-tesouro-direto"
 DATASET_OPERATIONS = "operacoes-do-tesouro-direto"
 DATASET_INVESTORS = "investidores-do-tesouro-direto"
 DATASET_MINT_STOCK = "estoque-do-tesouro-direto"
-DATASET_REDEMPTIONS = "resgates-do-tesouro-direto"
+DATASET_BUYBACKS = "resgates-do-tesouro-direto"
 DATASET_SALES = "vendas-do-tesouro-direto"
 
 HTTP_HEADERS = {
