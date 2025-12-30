@@ -23,7 +23,8 @@ import pandas as pd
 from .constants import Column
 
 
-def read(filepath: Path) -> pd.DataFrame:
+
+def read_prices(filepath: Path) -> pd.DataFrame:
     data = pd.read_csv(
         filepath,
         sep=";",
@@ -44,3 +45,139 @@ def read(filepath: Path) -> pd.DataFrame:
         }
     )
     return data
+
+
+def read_stock(filepath: Path) -> pd.DataFrame:
+    data = pd.read_csv(
+        filepath,
+        sep=";",
+        decimal=",",
+        parse_dates=["Vencimento do Titulo", "Mes Estoque"],
+        dayfirst=True,
+    )
+    data = data.rename(
+        columns={
+            "Tipo Titulo": Column.BOND_TYPE.value,
+            "Vencimento do Titulo": Column.MATURITY_DATE.value,
+            "Mes Estoque": Column.STOCK_MONTH.value,
+            "PU": Column.UNIT_PRICE.value,
+            "Quantidade": Column.QUANTITY.value,
+            "Valor Estoque": Column.STOCK_VALUE.value,
+        }
+    )
+    return data
+
+
+def read_investors(filepath: Path) -> pd.DataFrame:
+    data = pd.read_csv(
+        filepath,
+        sep=";",
+        parse_dates=["Data de Adesao"],
+        dayfirst=True,
+    )
+    data = data.rename(
+        columns={
+            "Codigo do Investidor": Column.INVESTOR_ID.value,
+            "Data de Adesao": Column.JOIN_DATE.value,
+            "Estado Civil": Column.MARITAL_STATUS.value,
+            "Genero": Column.GENDER.value,
+            "Profissao": Column.PROFESSION.value,
+            "Idade": Column.AGE.value,
+            "UF do Investidor": Column.STATE.value,
+            "Cidade do Investidor": Column.CITY.value,
+            "Pais do Investidor": Column.COUNTRY.value,
+            "Situacao da Conta": Column.ACCOUNT_STATUS.value,
+            "Operou 12 Meses": Column.TRADED_LAST_12_MONTHS.value,
+        }
+    )
+    return data
+
+
+def read_operations(filepath: Path) -> pd.DataFrame:
+    data = pd.read_csv(
+        filepath,
+        sep=";",
+        decimal=",",
+        parse_dates=["Data da Operacao", "Vencimento do Titulo"],
+        dayfirst=True,
+    )
+    data = data.rename(
+        columns={
+            "Codigo do Investidor": Column.INVESTOR_ID.value,
+            "Data da Operacao": Column.OPERATION_DATE.value,
+            "Tipo Titulo": Column.BOND_TYPE.value,
+            "Vencimento do Titulo": Column.MATURITY_DATE.value,
+            "Quantidade": Column.QUANTITY.value,
+            "Valor do Titulo": Column.BOND_VALUE.value,
+            "Valor da Operacao": Column.OPERATION_VALUE.value,
+            "Tipo da Operacao": Column.OPERATION_TYPE.value,
+            "Canal da Operacao": Column.CHANNEL.value,
+        }
+    )
+    return data
+
+
+def read_sales(filepath: Path) -> pd.DataFrame:
+    data = pd.read_csv(
+        filepath,
+        sep=";",
+        decimal=",",
+        parse_dates=["Vencimento do Titulo", "Data Venda"],
+        dayfirst=True,
+    )
+    data = data.rename(
+        columns={
+            "Tipo Titulo": Column.BOND_TYPE.value,
+            "Vencimento do Titulo": Column.MATURITY_DATE.value,
+            "Data Venda": Column.SALE_DATE.value,
+            "PU": Column.UNIT_PRICE.value,
+            "Quantidade": Column.QUANTITY.value,
+            "Valor": Column.VALUE.value,
+        }
+    )
+    return data
+
+
+def read_buybacks(filepath: Path) -> pd.DataFrame:
+    data = pd.read_csv(
+        filepath,
+        sep=";",
+        decimal=",",
+        parse_dates=["Vencimento do Titulo", "Data Resgate"],
+        dayfirst=True,
+    )
+    data = data.rename(
+        columns={
+            "Tipo Titulo": Column.BOND_TYPE.value,
+            "Vencimento do Titulo": Column.MATURITY_DATE.value,
+            "Data Resgate": Column.REDEMPTION_DATE.value,
+            "Quantidade": Column.QUANTITY.value,
+            "Valor": Column.VALUE.value,
+        }
+    )
+    return data
+
+
+def read_maturities(filepath: Path) -> pd.DataFrame:
+    data = pd.read_csv(
+        filepath,
+        sep=";",
+        decimal=",",
+        parse_dates=["Vencimento do Titulo", "Data Resgate"],
+        dayfirst=True,
+    )
+    data = data.rename(
+        columns={
+            "Tipo Titulo": Column.BOND_TYPE.value,
+            "Vencimento do Titulo": Column.MATURITY_DATE.value,
+            "Data Resgate": Column.REDEMPTION_DATE.value,
+            "PU": Column.UNIT_PRICE.value,
+            "Quantidade": Column.QUANTITY.value,
+            "Valor": Column.VALUE.value,
+        }
+    )
+    return data
+
+
+def read_interest_coupons(filepath: Path) -> pd.DataFrame:
+    return read_maturities(filepath)

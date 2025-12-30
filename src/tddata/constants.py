@@ -19,6 +19,37 @@ class Column(enum.Enum):
     SELL_PRICE = "sell_price"
     BASE_PRICE = "base_price"
 
+    # Stock (Estoque)
+    STOCK_MONTH = "stock_month"
+    QUANTITY = "quantity"
+    STOCK_VALUE = "stock_value"
+
+    # Investors (Investidores)
+    INVESTOR_ID = "investor_id"
+    JOIN_DATE = "join_date"
+    MARITAL_STATUS = "marital_status"
+    GENDER = "gender"
+    PROFESSION = "profession"
+    AGE = "age"
+    STATE = "state"
+    CITY = "city"
+    COUNTRY = "country"
+    ACCOUNT_STATUS = "account_status"
+    TRADED_LAST_12_MONTHS = "traded_last_12_months"
+
+    # Operations (Operacoes)
+    OPERATION_DATE = "operation_date"
+    BOND_VALUE = "bond_value"
+    OPERATION_VALUE = "operation_value"
+    OPERATION_TYPE = "operation_type"
+    CHANNEL = "channel"
+
+    # Common / Others
+    REDEMPTION_DATE = "redemption_date"
+    VALUE = "value"
+    SALE_DATE = "sale_date"
+    UNIT_PRICE = "unit_price"
+
 
 class BondType(enum.Enum):
     """Bond types for the Tesouro Direto data."""
