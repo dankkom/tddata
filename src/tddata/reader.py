@@ -56,7 +56,9 @@ def read_stock(filepath: Path) -> pd.DataFrame:
         sep=";",
         decimal=",",
     )
-    data["Vencimento do Titulo"] = pd.to_datetime(data["Vencimento do Titulo"], dayfirst=True)
+    data["Vencimento do Titulo"] = pd.to_datetime(
+        data["Vencimento do Titulo"], dayfirst=True
+    )
     data["Mes Estoque"] = pd.to_datetime(data["Mes Estoque"], format="%m/%Y")
     data = data.rename(
         columns={
@@ -153,7 +155,7 @@ def read_buybacks(filepath: Path) -> pd.DataFrame:
         columns={
             "Tipo Titulo": Column.BOND_TYPE.value,
             "Vencimento do Titulo": Column.MATURITY_DATE.value,
-            "Data Resgate": Column.REDEMPTION_DATE.value,
+            "Data Resgate": Column.BUYBACK_DATE.value,
             "Quantidade": Column.QUANTITY.value,
             "Valor": Column.VALUE.value,
         }
@@ -173,7 +175,7 @@ def read_maturities(filepath: Path) -> pd.DataFrame:
         columns={
             "Tipo Titulo": Column.BOND_TYPE.value,
             "Vencimento do Titulo": Column.MATURITY_DATE.value,
-            "Data Resgate": Column.REDEMPTION_DATE.value,
+            "Data Resgate": Column.BUYBACK_DATE.value,
             "PU": Column.UNIT_PRICE.value,
             "Quantidade": Column.QUANTITY.value,
             "Valor": Column.VALUE.value,

@@ -45,7 +45,7 @@ class Column(enum.Enum):
     CHANNEL = "channel"
 
     # Common / Others
-    REDEMPTION_DATE = "redemption_date"
+    BUYBACK_DATE = "buyback_date"
     VALUE = "value"
     SALE_DATE = "sale_date"
     UNIT_PRICE = "unit_price"

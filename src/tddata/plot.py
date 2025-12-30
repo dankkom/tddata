@@ -291,7 +291,7 @@ def plot_buybacks(data: pd.DataFrame, by_bond_type: bool = True):
     """Plot buybacks (redemptions) value over time."""
     return _plot_value_over_time(
         data,
-        date_col=Column.REDEMPTION_DATE.value,
+        date_col=Column.BUYBACK_DATE.value,
         value_col=Column.VALUE.value,
         title="Buybacks Volume Over Time",
         hue_col=Column.BOND_TYPE.value if by_bond_type else None,

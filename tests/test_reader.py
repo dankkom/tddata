@@ -29,14 +29,18 @@ class TestReader(unittest.TestCase):
         )
         filepath = self.create_csv_file("stock.csv", content)
         df = reader.read_stock(filepath)
-        
+
         self.assertEqual(len(df), 1)
         self.assertIn(Column.STOCK_MONTH.value, df.columns)
         self.assertIn(Column.BOND_TYPE.value, df.columns)
         self.assertEqual(df.iloc[0][Column.UNIT_PRICE.value], 800.50)
         self.assertEqual(df.iloc[0][Column.QUANTITY.value], 1000.00)
-        self.assertTrue(pd.api.types.is_datetime64_any_dtype(df[Column.MATURITY_DATE.value]))
-        self.assertTrue(pd.api.types.is_datetime64_any_dtype(df[Column.STOCK_MONTH.value]))
+        self.assertTrue(
+            pd.api.types.is_datetime64_any_dtype(df[Column.MATURITY_DATE.value])
+        )
+        self.assertTrue(
+            pd.api.types.is_datetime64_any_dtype(df[Column.STOCK_MONTH.value])
+        )
 
     def test_read_investors(self):
         content = (
@@ -49,7 +53,9 @@ class TestReader(unittest.TestCase):
         self.assertEqual(len(df), 1)
         self.assertIn(Column.INVESTOR_ID.value, df.columns)
         self.assertEqual(df.iloc[0][Column.INVESTOR_ID.value], 123)
-        self.assertTrue(pd.api.types.is_datetime64_any_dtype(df[Column.JOIN_DATE.value]))
+        self.assertTrue(
+            pd.api.types.is_datetime64_any_dtype(df[Column.JOIN_DATE.value])
+        )
 
     def test_read_operations(self):
         content = (
@@ -63,7 +69,9 @@ class TestReader(unittest.TestCase):
         self.assertEqual(df.iloc[0][Column.QUANTITY.value], 1.5)
         self.assertEqual(df.iloc[0][Column.OPERATION_VALUE.value], 1500.0)
         self.assertIn(Column.OPERATION_TYPE.value, df.columns)
-        self.assertTrue(pd.api.types.is_datetime64_any_dtype(df[Column.OPERATION_DATE.value]))
+        self.assertTrue(
+            pd.api.types.is_datetime64_any_dtype(df[Column.OPERATION_DATE.value])
+        )
 
     def test_read_sales(self):
         content = (
@@ -75,7 +83,9 @@ class TestReader(unittest.TestCase):
 
         self.assertEqual(len(df), 1)
         self.assertEqual(df.iloc[0][Column.VALUE.value], 6000.0)
-        self.assertTrue(pd.api.types.is_datetime64_any_dtype(df[Column.SALE_DATE.value]))
+        self.assertTrue(
+            pd.api.types.is_datetime64_any_dtype(df[Column.SALE_DATE.value])
+        )
 
     def test_read_buybacks(self):
         content = (
@@ -87,7 +97,9 @@ class TestReader(unittest.TestCase):
 
         self.assertEqual(len(df), 1)
         self.assertEqual(df.iloc[0][Column.VALUE.value], 4500.50)
-        self.assertTrue(pd.api.types.is_datetime64_any_dtype(df[Column.REDEMPTION_DATE.value]))
+        self.assertTrue(
+            pd.api.types.is_datetime64_any_dtype(df[Column.BUYBACK_DATE.value])
+        )
 
     def test_read_maturities(self):
         content = (
@@ -99,7 +111,9 @@ class TestReader(unittest.TestCase):
 
         self.assertEqual(len(df), 1)
         self.assertEqual(df.iloc[0][Column.UNIT_PRICE.value], 4000.00)
-        self.assertTrue(pd.api.types.is_datetime64_any_dtype(df[Column.REDEMPTION_DATE.value]))
+        self.assertTrue(
+            pd.api.types.is_datetime64_any_dtype(df[Column.BUYBACK_DATE.value])
+        )
 
     def test_read_prices(self):
         content = (
@@ -112,9 +126,10 @@ class TestReader(unittest.TestCase):
         self.assertEqual(len(df), 1)
         self.assertEqual(df.iloc[0][Column.BUY_YIELD.value], 0.01)
         self.assertEqual(df.iloc[0][Column.BASE_PRICE.value], 12002.50)
-        self.assertTrue(pd.api.types.is_datetime64_any_dtype(df[Column.REFERENCE_DATE.value]))
+        self.assertTrue(
+            pd.api.types.is_datetime64_any_dtype(df[Column.REFERENCE_DATE.value])
+        )
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
