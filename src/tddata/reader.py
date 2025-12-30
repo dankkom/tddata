@@ -20,16 +20,7 @@ types:
 from pathlib import Path
 import pandas as pd
 
-from .constants import (
-    REFERENCE_DATE_COLUMN,
-    BOND_TYPE_COLUMN,
-    MATURITY_DATE_COLUMN,
-    BUY_YIELD_COLUMN,
-    SELL_YIELD_COLUMN,
-    BUY_PRICE_COLUMN,
-    SELL_PRICE_COLUMN,
-    BASE_PRICE_COLUMN,
-)
+from .constants import Column
 
 
 def read(filepath: Path) -> pd.DataFrame:
@@ -42,14 +33,14 @@ def read(filepath: Path) -> pd.DataFrame:
     )
     data = data.rename(
         columns={
-            "Data Base": REFERENCE_DATE_COLUMN,
-            "Tipo Titulo": BOND_TYPE_COLUMN,
-            "Data Vencimento": MATURITY_DATE_COLUMN,
-            "Taxa Compra Manha": BUY_YIELD_COLUMN,
-            "Taxa Venda Manha": SELL_YIELD_COLUMN,
-            "PU Compra Manha": BUY_PRICE_COLUMN,
-            "PU Venda Manha": SELL_PRICE_COLUMN,
-            "PU Base Manha": BASE_PRICE_COLUMN,
+            "Data Base": Column.REFERENCE_DATE.value,
+            "Tipo Titulo": Column.BOND_TYPE.value,
+            "Data Vencimento": Column.MATURITY_DATE.value,
+            "Taxa Compra Manha": Column.BUY_YIELD.value,
+            "Taxa Venda Manha": Column.SELL_YIELD.value,
+            "PU Compra Manha": Column.BUY_PRICE.value,
+            "PU Venda Manha": Column.SELL_PRICE.value,
+            "PU Base Manha": Column.BASE_PRICE.value,
         }
     )
     return data
