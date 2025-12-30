@@ -3,7 +3,7 @@ import matplotlib.ticker as ticker
 import pandas as pd
 import seaborn as sns
 
-from .constants import Column
+from .constants import Column, OperationType
 
 
 def human_format(num, pos):
@@ -245,6 +245,12 @@ def plot_operations(data: pd.DataFrame, by_type: bool = True):
         data[Column.OPERATION_DATE.value].dt.to_period("M").dt.to_timestamp()
     )
 
+    # Map operation types to full names
+    if by_type:
+        data[Column.OPERATION_TYPE.value] = data[Column.OPERATION_TYPE.value].replace(
+            OperationType.get_labels()
+        )
+
     if by_type:
         grouped = (
             data.groupby(["month", Column.OPERATION_TYPE.value])[
@@ -260,6 +266,8 @@ def plot_operations(data: pd.DataFrame, by_type: bool = True):
             hue=Column.OPERATION_TYPE.value,
             ax=ax,
         )
+        ax.legend(title="Operation Type")
+
     else:
         grouped = (
             data.groupby("month")[Column.OPERATION_VALUE.value].sum().reset_index()

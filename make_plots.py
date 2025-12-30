@@ -191,12 +191,12 @@ def run_buybacks():
 
 def main():
     print("Starting plot generation...")
-    # run_prices()
-    # run_stock()
+    run_prices()
+    run_stock()
     run_investors()
-    # run_operations()
-    # run_sales()
-    # run_buybacks()
+    run_operations()
+    run_sales()
+    run_buybacks()
     print("Done!")
 
 

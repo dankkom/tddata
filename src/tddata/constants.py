@@ -79,6 +79,24 @@ class BondType(enum.Enum):
     EDUCA = "Tesouro EducA+"
 
 
+class OperationType(enum.Enum):
+    """Operation types for the Tesouro Direto data."""
+
+    BUY = "C"
+    SELL = "V"
+    WITHDRAWAL = "R"
+    DEPOSIT = "D"
+
+    @classmethod
+    def get_labels(cls):
+        return {
+            cls.BUY.value: "Compra",
+            cls.SELL.value: "Venda",
+            cls.WITHDRAWAL.value: "Retirada",
+            cls.DEPOSIT.value: "Depósito",
+        }
+
+
 CKAN_API_URL = "https://www.tesourotransparente.gov.br/ckan/api/3/action/package_show"
 
 DATASET_PRICES_RATES = "taxas-dos-titulos-ofertados-pelo-tesouro-direto"
