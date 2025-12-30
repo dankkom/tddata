@@ -18,10 +18,10 @@ types:
 """
 
 from pathlib import Path
+
 import pandas as pd
 
 from .constants import Column
-
 
 
 def read_prices(filepath: Path) -> pd.DataFrame:
@@ -48,13 +48,16 @@ def read_prices(filepath: Path) -> pd.DataFrame:
 
 
 def read_stock(filepath: Path) -> pd.DataFrame:
+    # 'Mes Estoque' is in format %m/%Y (e.g. 11/2021)
+    # 'Vencimento do Titulo' is in format %d/%m/%Y
+    # It's better to read as strings first and convert manually to avoid warnings/ambiguities
     data = pd.read_csv(
         filepath,
         sep=";",
         decimal=",",
-        parse_dates=["Vencimento do Titulo", "Mes Estoque"],
-        dayfirst=True,
     )
+    data["Vencimento do Titulo"] = pd.to_datetime(data["Vencimento do Titulo"], dayfirst=True)
+    data["Mes Estoque"] = pd.to_datetime(data["Mes Estoque"], format="%m/%Y")
     data = data.rename(
         columns={
             "Tipo Titulo": Column.BOND_TYPE.value,
