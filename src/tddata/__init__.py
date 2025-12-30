@@ -1,1 +1,3 @@
-from . import downloader, reader
+from . import downloader, plot, reader
+
+__all__ = ["downloader", "plot", "reader"]

@@ -1,10 +1,10 @@
 """Functions to download Tesouro Direto's historical data"""
 
 import datetime as dt
-from pathlib import Path
-from typing import List, Dict
-import unicodedata
 import re
+import unicodedata
+from pathlib import Path
+from typing import Dict, List
 
 import httpx
 from tqdm import tqdm

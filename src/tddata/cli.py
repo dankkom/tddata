@@ -2,7 +2,14 @@ import argparse
 from pathlib import Path
 
 from . import downloader
-from .constants import DATASET_PRICES_RATES, DATASET_OPERATIONS, DATASET_INVESTORS, DATASET_MINT_STOCK, DATASET_BUYBACKS, DATASET_SALES
+from .constants import (
+    DATASET_BUYBACKS,
+    DATASET_INVESTORS,
+    DATASET_MINT_STOCK,
+    DATASET_OPERATIONS,
+    DATASET_PRICES_RATES,
+    DATASET_SALES,
+)
 
 
 def set_parser():
