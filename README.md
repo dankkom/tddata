@@ -1,128 +1,155 @@
-# tddata - easly download & read brazilian Tesouro Direto's data
+# tddata - Download, Analyze & Plot Brazilian Tesouro Direto's Data (CKAN API)
 
 ![GitHub](https://img.shields.io/github/license/dankkom/tddata?style=flat-square)
 
-tddata is a simple Python package to download and read Brazil's bonds data from Tesouro Direto program.
+**tddata** is a powerful Python package designed to simplify the process of downloading, reading, and visualizing historical data from Brazil's Tesouro Direto program. It leverages the official CKAN API (Tesouro Transparente) to fetch the most up-to-date datasets.
 
-## 1. Install
+## Features
 
-To install the package, you can use pip:
+*   **Automated Downloads**: Easily fetch datasets directly from the Government's CKAN API.
+*   **Specialized Readers**: Dedicated functions to read and parse CSVs for Prices, Stock, Investors, Operations, Sales, Buybacks/Redemptions, and more.
+*   **Standardized Data**: All DataFrames come with consistent, analyst-friendly column names defined in a robust schema.
+*   **Visualization**: Built-in plotting module to generate beautiful time-series, distribution, and demographic charts using Matplotlib and Seaborn.
+*   **CLI**: A convenient command-line interface for quick data fetching.
+
+## 1. Installation
+
+This package is currently available via GitHub. You can install it using `pip`:
 
 ```shell
-pip install git+https://github.com/dankkom/tddata#egg=tddata
+pip install "git+https://github.com/dankkom/tddata#egg=tddata"
 ```
-
-Note that this package is not available on PyPI yet. You can install it directly from the GitHub repository, needing Git installed on your machine.
 
 ## 2. Usage
 
 ### 2.1 The `tddata` CLI
 
-This package comes with a Command - Line Interface(CLI) that makes downloading Tesouro Direto's data easier.
+The package includes a Command-Line Interface (CLI) to download datasets quickly.
 
-The syntax is as follows:
+**Syntax:**
 
+```bash
+tddata [DATASET_ID] [-o OUTPUT_DIR]
 ```
-tddata {bond_name} {year} [-o | --output | --data-dir OUTPUT/DIRECTORY/PATH]
+
+**Examples:**
+
+```bash
+# Download prices/rates
+tddata prices -o ./data
+
+# Download stock (estoque) data
+tddata stock -o ./data
+
+# Download investors data
+tddata investors -o ./data
 ```
 
-### 2.2 The `tddata` Python package
+Available datasets: `prices`, `stock`, `investors`, `operations`, `sales`, `buybacks`, `maturities`.
 
-Import the package with:
+### 2.2 The `tddata` Python Package
+
+You can use `tddata` as a library in your Python scripts or Jupyter Notebooks.
+
+#### Downloading Data
 
 ```python
-import tddata
+from pathlib import Path
+from tddata import downloader
+
+# Download 'prices' dataset to ./data folder
+downloader.download(
+    dest_dir=Path("./data"),
+    dataset_id="taxas-dos-titulos-ofertados-pelo-tesouro-direto",
+)
 ```
 
-Before you start to work the data, you need to download it to your local machine.
+#### Reading Data
+
+The `tddata.reader` module provides specialized functions for each dataset type.
 
 ```python
-# Download Tesouro Direto's data and save at ./data/td/
-# The file is saved with the following name pattern: tesouro-direto_{last_modified:%Y%m%d%H%M}.csv
-tddata.downloader.download(dest_path="./data/")
+from pathlib import Path
+from tddata import reader
+
+# Read Prices/Rates
+df_prices = reader.read_prices(
+    Path(
+        ".", "data",
+        "taxas-dos-titulos-ofertados-pelo-tesouro-direto@2025-12-30T10:20:10.csv"
+    )
+)
+
+# Read Stock
+df_stock = reader.read_stock(
+    Path(
+        ".", "data",
+        "estoque-do-tesouro-direto@2025-12-01T10:20:18.csv"
+    )
+)
+
+# Read Investors
+df_investors = reader.read_investors(
+    Path(
+        ".", "data",
+        "investidores-do-tesouro-direto-de-2024@2025-12-05T13:19:39.csv"
+    )
+)
 ```
 
-Now you can read the data.
+#### Plotting Data
 
-You can use `read_file()` to read:
-
-```python
-# Read data file
-data = tddata.reader.read_file("~/data/tesouro-direto_202403021021.csv")
-```
-
-## 3. Example
-
-In the example below we plot the daily yields of LTN bonds from 2022-01-01 to the latest date available in the data.
+The `tddata.plot` module makes visualization easy.
 
 ```python
 import matplotlib.pyplot as plt
-import seaborn as sns
+from tddata import plot
+from tddata.constants import Column
 
-import tddata
+# 1. Plot Price History
+fig1 = plot.plot_prices(df_prices, bond_type="Tesouro Selic", variable=Column.BASE_PRICE.value)
+fig1.show()
 
+# 2. Plot Stock Evolution by Bond Type
+fig2 = plot.plot_stock(df_stock, by_bond_type=True)
+fig2.show()
 
-data = tddata.reader.read("data/tesouro-direto_202403021021.csv")
-
-# Filter data by date and create a new column with the bond's year of maturity
-ltn = data[data["bond_name"] == "Tesouro Prefixado"]
-ltn = ltn[ltn["reference_date"] >= "2022-01-01"]
-ltn = ltn.assign(
-    maturity_year=ltn["reference_date"].dt.year,
+# 3. Plot Investor Demographics (e.g., Gender Pie Chart)
+fig3 = plot.plot_investors_demographics(
+    df_investors,
+    column=Column.GENDER.value,
+    chart_type="pie",
 )
+fig3.show()
 
-# Now plot the data with matplotlib and seaborn
-
-# Set the style of the plot
-sns.set_theme(style="ticks")
-plt.rcParams["axes.labelsize"] = 8
-plt.rcParams["axes.titlesize"] = 12
-plt.rcParams["xtick.labelsize"] = 8
-plt.rcParams["ytick.labelsize"] = 8
-plt.rcParams["legend.fontsize"] = 8
-
-# With the hue argument we plot each year of maturity by a diferent lines and colors
-bond_type = "Tesouro Prefixado"
-f, ax = plt.subplots(figsize=(10, 5))
-sns.lineplot(
-    data=data[data["bond_type"] == bond_type],
-    x="reference_date",
-    y="sell_yield",
-    hue="maturity_year",
-    estimator=None,
-    ax=ax,
-    palette="viridis",
-    legend="full",
-    linewidth=1.5,
+# 4. Plot Investor Demographics (e.g., Profession Horizontal Bar)
+fig4 = plot.plot_investors_demographics(
+    df_investors,
+    column=Column.PROFESSION.value,
+    chart_type="barh",
 )
-ax.set_title(f"Tesouro Direto - {bond_type} - Daily Sell Yield")
-ax.set_xlabel("Date")
-ax.set_ylabel("Sell Yield (%)")
-# Legend position
-ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-# Grid off
-sns.despine(ax=ax)
-f.tight_layout()
-# Add text with the data source at the bottom left of the figure
-plt.figtext(
-    0.01,
-    0.01,
-    "Data source: Tesouro Direto",
-    horizontalalignment="left",
-    fontsize=8,
-    color="gray",
-)
-plt.show()
+fig4.show()
 ```
 
-![Chart showing LTN daily rates](plots/plot1.png)
+![Price History](./plots/prices_tesouro-selic_base_price.png)
+
+![Stock Evolution](./plots/stock_evolution_by_type.png)
+
+![Investor Demographics by Gender](./plots/investors_demographics_gender.png)
+
+![Investor Demographics by Profession](./plots/investors_demographics_profession.png)
+
+## 3. Data Source
+
+All data is fetched from the official **Tesouro Transparente** via their [CKAN API](https://www.tesourotransparente.gov.br/ckan/).
+
+*   **Prices**: `taxas-dos-titulos-ofertados-pelo-tesouro-direto`
+*   **Stock**: `estoque-do-tesouro-direto`
+*   **Investors**: `investidores-do-tesouro-direto`
+*   **Operations**: `operacoes-do-tesouro-direto`
+*   **Sales**: `vendas-do-tesouro-direto`
+*   **Buybacks**: `recompras-do-tesouro-direto`
 
 ## 4. License
 
 This project is licensed under the MIT License.
-
-See LICENSE to see the full text.
-
----
-
-Data Source: all data are downloaded from [Tesouro Transparente/Secretaria do Tesouro Nacional](https://www.tesourotransparente.gov.br/ckan/dataset/taxas-dos-titulos-ofertados-pelo-tesouro-direto/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1).
