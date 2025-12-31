@@ -14,23 +14,15 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-"""Functions to read TD's data files, returning convenient, analyst friendly,
-Pandas DataFrames
+"""Functions to read Tesouro Direto's data files.
 
-The DataFrame returned by these functions have the following column names and
-types:
+This module provides functions to parse raw CSV files downloaded from the
+Tesouro Transparente API into clean, analyst-friendly pandas DataFrames.
+It handles column renaming (Portuguese to English), type conversion,
+and data normalization using the schema defined in `constants.py`.
 
-| Colmn Name     | type              |
-|----------------|-------------------|
-| reference_date | datetime.datetime |
-| buy_yield      | float             |
-| sell_yield     | float             |
-| buy_price      | float             |
-| sell_price     | float             |
-| base_price     | float             |
-| maturity_date  | datetime.datetime |
-| bond_type      | str               |
-
+The DataFrames returned by these functions use standardized column names
+defined in the `Column` enum.
 """
 
 from pathlib import Path
@@ -47,6 +39,24 @@ from .constants import (
 
 
 def read_prices(filepath: Path) -> pd.DataFrame:
+    """Read bond prices and rates (Taxas e Preços dos Títulos).
+
+    Parses the daily prices and yields for government bonds.
+
+    Args:
+        filepath: Path to the CSV file.
+
+    Returns:
+        pd.DataFrame: DataFrame with columns:
+            - reference_date: Date of the record
+            - bond_type: Name of the bond (e.g., Tesouro Selic)
+            - maturity_date: Maturity date of the bond
+            - buy_yield: Yield for buying
+            - sell_yield: Yield for selling
+            - buy_price: Price for buying
+            - sell_price: Price for selling
+            - base_price: Base price
+    """
     data = pd.read_csv(
         filepath,
         sep=";",
@@ -70,6 +80,22 @@ def read_prices(filepath: Path) -> pd.DataFrame:
 
 
 def read_stock(filepath: Path) -> pd.DataFrame:
+    """Read bond stock (Estoque).
+
+    Parses the monthly stock of government bonds.
+
+    Args:
+        filepath: Path to the CSV file.
+
+    Returns:
+        pd.DataFrame: DataFrame with columns:
+            - bond_type: Name of the bond
+            - maturity_date: Maturity date of the bond
+            - stock_month: Month of the stock record
+            - unit_price: Unit price of the bond
+            - quantity: Quantity of bonds in stock
+            - stock_value: Total value of the stock
+    """
     # 'Mes Estoque' is in format %m/%Y (e.g. 11/2021)
     # 'Vencimento do Titulo' is in format %d/%m/%Y
     # It's better to read as strings first and convert manually to avoid warnings/ambiguities
@@ -96,6 +122,27 @@ def read_stock(filepath: Path) -> pd.DataFrame:
 
 
 def read_investors(filepath: Path) -> pd.DataFrame:
+    """Read investors data (Investidores).
+
+    Parses the list of investors registered in Tesouro Direto.
+
+    Args:
+        filepath: Path to the CSV file.
+
+    Returns:
+        pd.DataFrame: DataFrame with columns:
+            - investor_id: Unique identifier for the investor
+            - join_date: Date the investor joined
+            - marital_status: Marital status
+            - gender: Gender (mapped to standardized values)
+            - profession: Profession
+            - age: Age
+            - state: State (UF)
+            - city: City
+            - country: Country
+            - account_status: Account status (Active/Deactivated)
+            - traded_last_12_months: Whether traded in last 12 months
+    """
     data = pd.read_csv(
         filepath,
         sep=";",
@@ -141,6 +188,25 @@ def read_investors(filepath: Path) -> pd.DataFrame:
 
 
 def read_operations(filepath: Path) -> pd.DataFrame:
+    """Read operations data (Operações).
+
+    Parses the history of buy/sell/custody operations.
+
+    Args:
+        filepath: Path to the CSV file.
+
+    Returns:
+        pd.DataFrame: DataFrame with columns:
+            - investor_id: Investor ID
+            - operation_date: Date of the operation
+            - bond_type: Bond type
+            - maturity_date: Maturity date
+            - quantity: Quantity traded
+            - bond_value: Unit value of the bond
+            - operation_value: Total value of the operation
+            - operation_type: Type (Buy, Sell, etc.)
+            - channel: Channel used (Site, Homebroker)
+    """
     data = pd.read_csv(
         filepath,
         sep=";",
@@ -170,6 +236,22 @@ def read_operations(filepath: Path) -> pd.DataFrame:
 
 
 def read_sales(filepath: Path) -> pd.DataFrame:
+    """Read sales data (Vendas).
+
+    Parses the history of bond sales (investments).
+
+    Args:
+        filepath: Path to the CSV file.
+
+    Returns:
+        pd.DataFrame: DataFrame with columns:
+            - bond_type: Bond type
+            - maturity_date: Maturity date
+            - sale_date: Date of the sale
+            - unit_price: Unit price
+            - quantity: Quantity sold
+            - value: Total value
+    """
     data = pd.read_csv(
         filepath,
         sep=";",
@@ -191,6 +273,21 @@ def read_sales(filepath: Path) -> pd.DataFrame:
 
 
 def read_buybacks(filepath: Path) -> pd.DataFrame:
+    """Read buybacks data (Resgates).
+
+    Parses the history of bond buybacks/redemptions.
+
+    Args:
+        filepath: Path to the CSV file.
+
+    Returns:
+        pd.DataFrame: DataFrame with columns:
+            - bond_type: Bond type
+            - maturity_date: Maturity date
+            - buyback_date: Date of the buyback
+            - quantity: Quantity redeemed
+            - value: Total value
+    """
     data = pd.read_csv(
         filepath,
         sep=";",
@@ -211,6 +308,22 @@ def read_buybacks(filepath: Path) -> pd.DataFrame:
 
 
 def read_maturities(filepath: Path) -> pd.DataFrame:
+    """Read maturities data (Vencimentos).
+
+    Parses the history of bond maturities.
+
+    Args:
+        filepath: Path to the CSV file.
+
+    Returns:
+        pd.DataFrame: DataFrame with columns:
+            - bond_type: Bond type
+            - maturity_date: Maturity date
+            - buyback_date: Date of the maturity/redemption
+            - unit_price: Unit price
+            - quantity: Quantity matured
+            - value: Total value
+    """
     data = pd.read_csv(
         filepath,
         sep=";",
@@ -232,4 +345,15 @@ def read_maturities(filepath: Path) -> pd.DataFrame:
 
 
 def read_interest_coupons(filepath: Path) -> pd.DataFrame:
+    """Read interest coupons data (Pagamento de Cupom de Juros).
+
+    Parses the history of interest coupon payments.
+    This file shares the same structure as the maturities file.
+
+    Args:
+        filepath: Path to the CSV file.
+
+    Returns:
+        pd.DataFrame: DataFrame with columns similar to `read_maturities`.
+    """
     return read_maturities(filepath)

@@ -14,7 +14,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-"""Utilities for file storage and naming conventions"""
+"""Utilities for file storage and naming conventions.
+
+This module provides helper functions for managing file names and storage
+operations, ensuring consistent naming patterns across the application.
+It handles slugification of names, generation of timestamped filenames,
+and retrieval of the latest file versions from a directory.
+"""
 
 import datetime as dt
 import re
@@ -24,9 +30,16 @@ from typing import Dict, List
 
 
 def slugify(value: str) -> str:
-    """
-    Normalizes string, converts to lowercase, removes non-alpha characters,
+    """Normalize a string to a URL-friendly slug.
+
+    Converts the string to lowercase, removes non-alpha characters,
     and converts spaces to hyphens.
+
+    Args:
+        value: The string to slugify.
+
+    Returns:
+        str: The slugified string.
     """
     value = (
         unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
@@ -38,8 +51,17 @@ def slugify(value: str) -> str:
 def generate_filename(name: str, last_modified: str | None = None) -> str:
     """Generate a standardized filename for a resource.
 
-    Format: <slugified-name>@<timestamp>.csv
-    Timestamp format: YYYYMMDDTHHMMSS (Compact ISO 8601)
+    The filename format is: `<slugified-name>@<timestamp>.csv`
+    The timestamp format is Compact ISO 8601: `YYYYMMDDTHHMMSS`
+
+    Args:
+        name: The base name of the resource (e.g., "Tesouro Selic").
+        last_modified: An optional ISO 8601 timestamp string representing
+            the last modification time. If not provided or invalid, the
+            current time is used.
+
+    Returns:
+        str: The generated filename.
     """
     name_slug = slugify(name)
 
@@ -58,12 +80,18 @@ def generate_filename(name: str, last_modified: str | None = None) -> str:
 
 
 def get_latest_files(directory: Path) -> List[Path]:
-    """
-    Scan a directory and return only the latest version of each file group.
+    """Scan a directory and return only the latest version of each file group.
 
-    Files are grouped by their slug (part before @).
-    For files with year patterns (e.g. investors-2024), it keeps the latest
-    version of that specific year file.
+    Files are grouped by their slug (the part of the filename before the '@').
+    For each group, only the file with the lexicographically largest timestamp
+    is returned. This is useful for handling versioned files where multiple
+    downloads of the same dataset might exist.
+
+    Args:
+        directory: The directory to scan for CSV files.
+
+    Returns:
+        List[Path]: A sorted list of paths to the latest version of each file.
     """
     if not directory.exists():
         return []
@@ -94,7 +122,20 @@ def get_latest_files(directory: Path) -> List[Path]:
     return sorted(list(files_map.values()))
 
 
-def get_latest_file(data_dir: Path, pattern: str) -> Path:
+def get_latest_file(data_dir: Path, pattern: str) -> Path | None:
+    """Find the latest file matching a specific pattern in a directory.
+
+    This function searches for files matching the given glob pattern and
+    returns the one with the latest timestamp suffix.
+
+    Args:
+        data_dir: The directory to search in.
+        pattern: The glob pattern to match files (e.g., "investors*.csv").
+
+    Returns:
+        Path | None: The path to the latest file matching the pattern, or
+            None if no matching files are found.
+    """
     files = list(data_dir.glob(pattern))
     if not files:
         return None
