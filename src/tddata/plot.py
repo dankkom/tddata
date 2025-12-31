@@ -254,6 +254,7 @@ def _plot_demographics_barh(ax, counts: pd.Series, human_col: str):
     # Wrap long labels
     max_width = 30
     new_labels = [textwrap.fill(str(label), width=max_width) for label in counts.index]
+    ax.set_yticks(range(len(counts)))
     ax.set_yticklabels(new_labels)
 
     sns.despine(ax=ax)
@@ -303,7 +304,7 @@ def plot_investors_population_pyramid(data: pd.DataFrame):
 
     # Count by age group and gender
     grouped = (
-        pyramid_data.groupby(["age_group", Column.GENDER.value])
+        pyramid_data.groupby(["age_group", Column.GENDER.value], observed=False)
         .size()
         .reset_index(name="count")
     )
