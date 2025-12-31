@@ -177,7 +177,30 @@ def plot_investors_demographics(
     """Plot distribution of investors by a categorical column (State, Gender, etc)."""
     f, ax = plt.subplots(figsize=(10, 6))
 
-    # Create a copy to avoid modifying original data
+    # Prepare data with enum mappings
+    plot_data = _prepare_demographics_data(data, column)
+
+    # Get value counts
+    counts = _get_demographics_counts(plot_data, column, top_n)
+
+    human_col = _humanize_label(column)
+
+    # Plot based on chart type
+    if chart_type == "pie":
+        _plot_demographics_pie(ax, counts)
+    elif chart_type == "barh":
+        _plot_demographics_barh(ax, counts, human_col)
+    else:
+        _plot_demographics_bar(ax, counts, human_col, column)
+
+    ax.set_title(f"Investors Distribution by {human_col}")
+    _add_footer(f)
+    f.tight_layout()
+    return f
+
+
+def _prepare_demographics_data(data: pd.DataFrame, column: str) -> pd.DataFrame:
+    """Prepare demographics data by mapping enum codes to human-readable labels."""
     plot_data = data.copy()
 
     # Map enum codes to human-readable labels for plotting
@@ -188,63 +211,75 @@ def plot_investors_demographics(
     elif column == Column.TRADED_LAST_12_MONTHS.value:
         plot_data[column] = plot_data[column].map(TradedLast12Months.get_labels())
 
-    # Count frequency
-    counts = plot_data[column].value_counts().head(top_n)
+    return plot_data
 
-    human_col = _humanize_label(column)
 
-    if chart_type == "pie":
-        ax.pie(
-            counts.values,
-            labels=counts.index,
-            autopct="%1.1f%%",
-            startangle=90,
-            colors=sns.color_palette("viridis", len(counts)),
-        )
-        # Equal aspect ratio ensures that pie is drawn as a circle.
-        ax.axis("equal")
-    elif chart_type == "barh":
-        sns.barplot(
-            x=counts.values,
-            y=counts.index,
-            hue=counts.index,
-            palette="viridis",
-            legend=False,
-            ax=ax,
-        )
-        ax.set_xlabel("Count")
-        ax.set_ylabel(human_col)
-        ax.xaxis.set_major_formatter(ticker.FuncFormatter(human_format))
-
-        # Wrap long labels
-        import textwrap
-
-        max_width = 30
-        new_labels = [
-            textwrap.fill(str(label), width=max_width) for label in counts.index
-        ]
-        ax.set_yticklabels(new_labels)
-
-        sns.despine(ax=ax)
+def _get_demographics_counts(data: pd.DataFrame, column: str, top_n: int) -> pd.Series:
+    """Get value counts for demographics data with special handling for age."""
+    # For age, show full distribution; for other columns, apply top_n limit
+    if column == Column.AGE.value:
+        return data[column].value_counts().sort_index()
     else:
-        sns.barplot(
-            x=counts.index,
-            y=counts.values,
-            hue=counts.index,
-            palette="viridis",
-            legend=False,
-            ax=ax,
-        )
-        ax.set_ylabel("Count")
-        ax.set_xlabel(human_col)
-        ax.yaxis.set_major_formatter(ticker.FuncFormatter(human_format))
-        plt.xticks(rotation=45)
-        sns.despine(ax=ax)
+        return data[column].value_counts().head(top_n)
 
-    ax.set_title(f"Investors Distribution by {human_col}")
-    _add_footer(f)
-    f.tight_layout()
-    return f
+
+def _plot_demographics_pie(ax, counts: pd.Series):
+    """Plot demographics data as a pie chart."""
+    ax.pie(
+        counts.values,
+        labels=counts.index,
+        autopct="%1.1f%%",
+        startangle=90,
+        colors=sns.color_palette("viridis", len(counts)),
+    )
+    # Equal aspect ratio ensures that pie is drawn as a circle.
+    ax.axis("equal")
+
+
+def _plot_demographics_barh(ax, counts: pd.Series, human_col: str):
+    """Plot demographics data as a horizontal bar chart."""
+    import textwrap
+
+    sns.barplot(
+        x=counts.values,
+        y=counts.index,
+        hue=counts.index,
+        palette="viridis",
+        legend=False,
+        ax=ax,
+    )
+    ax.set_xlabel("Count")
+    ax.set_ylabel(human_col)
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(human_format))
+
+    # Wrap long labels
+    max_width = 30
+    new_labels = [textwrap.fill(str(label), width=max_width) for label in counts.index]
+    ax.set_yticklabels(new_labels)
+
+    sns.despine(ax=ax)
+
+
+def _plot_demographics_bar(ax, counts: pd.Series, human_col: str, column: str):
+    """Plot demographics data as a vertical bar chart."""
+    sns.barplot(
+        x=counts.index,
+        y=counts.values,
+        hue=counts.index,
+        palette="viridis",
+        legend=False,
+        ax=ax,
+    )
+    ax.set_ylabel("Count")
+    ax.set_xlabel(human_col)
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(human_format))
+
+    # For age, limit the number of x-axis ticks to avoid overcrowding
+    if column == Column.AGE.value:
+        ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=20, integer=True))
+
+    plt.xticks(rotation=45)
+    sns.despine(ax=ax)
 
 
 def plot_investors_evolution(data: pd.DataFrame, freq: str = "ME"):
