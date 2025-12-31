@@ -14,6 +14,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from typing import Optional
+
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import pandas as pd
@@ -136,6 +138,7 @@ def plot_stock(data: pd.DataFrame, by_bond_type: bool = True):
             hue=Column.BOND_TYPE.value,
             ax=ax,
         )
+        ax.legend(title="Bond Type")
     else:
         df_grouped = (
             data.groupby([Column.STOCK_MONTH.value])[Column.STOCK_VALUE.value]
@@ -156,6 +159,7 @@ def plot_stock(data: pd.DataFrame, by_bond_type: bool = True):
     _add_footer(f)
     sns.despine(ax=ax)
     f.tight_layout()
+    return f
     return f
 
 
@@ -308,6 +312,7 @@ def plot_sales(data: pd.DataFrame, by_bond_type: bool = True):
         value_col=Column.VALUE.value,
         title="Sales Volume Over Time",
         hue_col=Column.BOND_TYPE.value if by_bond_type else None,
+        legend_title="Bond Type",
     )
 
 
@@ -319,6 +324,7 @@ def plot_buybacks(data: pd.DataFrame, by_bond_type: bool = True):
         value_col=Column.VALUE.value,
         title="Buybacks Volume Over Time",
         hue_col=Column.BOND_TYPE.value if by_bond_type else None,
+        legend_title="Bond Type",
     )
 
 
@@ -330,6 +336,7 @@ def plot_maturities(data: pd.DataFrame, by_bond_type: bool = True):
         value_col=Column.VALUE.value,
         title="Maturities Volume Over Time",
         hue_col=Column.BOND_TYPE.value if by_bond_type else None,
+        legend_title="Bond Type",
     )
 
 
@@ -341,11 +348,17 @@ def plot_interest_coupons(data: pd.DataFrame, by_bond_type: bool = True):
         value_col=Column.VALUE.value,
         title="Interest Coupons Payments Over Time",
         hue_col=Column.BOND_TYPE.value if by_bond_type else None,
+        legend_title="Bond Type",
     )
 
 
 def _plot_value_over_time(
-    data: pd.DataFrame, date_col: str, value_col: str, title: str, hue_col: str = None
+    data: pd.DataFrame,
+    date_col: str,
+    value_col: str,
+    title: str,
+    hue_col: Optional[str] = None,
+    legend_title: Optional[str] = None,
 ):
     f, ax = plt.subplots(figsize=(10, 6))
 
@@ -357,6 +370,8 @@ def _plot_value_over_time(
     if hue_col:
         grouped = df.groupby(["month", hue_col])[value_col].sum().reset_index()
         sns.lineplot(data=grouped, x="month", y=value_col, hue=hue_col, ax=ax)
+        if legend_title:
+            ax.legend(title=legend_title)
     else:
         grouped = df.groupby("month")[value_col].sum().reset_index()
         sns.lineplot(data=grouped, x="month", y=value_col, ax=ax)
