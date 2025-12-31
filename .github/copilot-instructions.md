@@ -33,7 +33,7 @@ All `read_*()` functions in `reader.py`:
 - Monthly aggregation pattern: `df["month"] = df[date_col].dt.to_period("M").dt.to_timestamp()`
 
 ### File Naming Patterns
-- Downloaded files: `<slugified-name>@<ISO-timestamp>.csv` (e.g., `taxas-dos-titulos-ofertados-pelo-tesouro-direto@2025-12-30T10:20:10.csv`)
+- Downloaded files: `<slugified-name>@<ISO-timestamp>.csv` (e.g., `taxas-dos-titulos-ofertados-pelo-tesouro-direto@20251230T102010.csv`)
 - Plot files: Follow pattern in `make_plots.py` (e.g., `prices_tesouro-selic_base_price.png`, `stock_evolution_by_type.png`)
 
 ## Development Workflow
