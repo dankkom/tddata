@@ -1,3 +1,19 @@
+# Copyright (C) 2020-2025 Daniel Kiyoyudi Komesu
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
 """Functions to download Tesouro Direto's historical data"""
 
 import datetime as dt
@@ -17,7 +33,9 @@ def slugify(value: str) -> str:
     Normalizes string, converts to lowercase, removes non-alpha characters,
     and converts spaces to hyphens.
     """
-    value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+    value = (
+        unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+    )
     value = re.sub(r"[^\w\s-]", "", value).strip().lower()
     return re.sub(r"[-\s]+", "-", value)
 
@@ -59,23 +77,23 @@ def download(dest_dir: Path, dataset_id: str) -> List[Dict]:
         # Determine filename
         # Pattern: <dataset-name>@<modified-timestamp-in-iso-8601-format>.csv
         # We use slugified resource name as <dataset-name> to ensure uniqueness within datasets
-        
+
         name_slug = slugify(resource["name"])
-        
+
         last_modified_str = resource.get("last_modified") or resource.get("created")
         if last_modified_str:
             try:
                 # CKAN returns ISO format: 2025-12-04T12:59:45.172801
                 # Parsing logic
                 if "." in last_modified_str:
-                     # Truncate microseconds for cleaner filename if desired, or keep them.
-                     # User asked for ISO 8601.
-                     timestamp = dt.datetime.fromisoformat(last_modified_str)
+                    # Truncate microseconds for cleaner filename if desired, or keep them.
+                    # User asked for ISO 8601.
+                    timestamp = dt.datetime.fromisoformat(last_modified_str)
                 else:
-                     timestamp = dt.datetime.fromisoformat(last_modified_str)
-                
+                    timestamp = dt.datetime.fromisoformat(last_modified_str)
+
                 # Format: YYYY-MM-DDTHH:MM:SS (standard ISO)
-                # However, colons might be problematic on some filesystems (Windows), 
+                # However, colons might be problematic on some filesystems (Windows),
                 # but valid on Linux. User asked for ISO-8601.
                 # We will keep strict ISO format.
                 timestamp_str = timestamp.isoformat(timespec="seconds")

@@ -5,6 +5,7 @@ authors = [
   { name="Daniel Komesu", email="daniel@dkko.me" },
 ]
 description = "Easly download & read brazilian Tesouro Direto's data"
+license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [

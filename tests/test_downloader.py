@@ -1,3 +1,18 @@
+# Copyright (C) 2020-2025 Daniel Kiyoyudi Komesu
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 
 import shutil
 import tempfile
@@ -77,7 +92,7 @@ class TestDownloader(unittest.TestCase):
         mock_response.status_code = 200
         mock_response.headers = {"Content-Length": "10"}
         mock_response.iter_bytes.return_value = [b"chunk1", b"chunk2"]
-        
+
         mock_stream.return_value.__enter__.return_value = mock_response
 
         # Execute download
@@ -86,11 +101,11 @@ class TestDownloader(unittest.TestCase):
         # Verify
         expected_filename = "resource-1@2024-01-01T12:00:00.csv"
         expected_path = self.test_dir / expected_filename
-        
+
         self.assertTrue(expected_path.exists())
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["filename"], expected_filename)
-        
+
         with open(expected_path, "rb") as f:
             content = f.read()
         self.assertEqual(content, b"chunk1chunk2")
@@ -102,7 +117,7 @@ class TestDownloader(unittest.TestCase):
         filepath = self.test_dir / filename
         with open(filepath, "w") as f:
             f.write("existing content")
-            
+
         mock_get_resources.return_value = [
             {
                 "name": "Resource 1",
