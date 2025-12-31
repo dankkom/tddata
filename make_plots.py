@@ -122,23 +122,23 @@ def run_investors(data_dir: Path):
     # Drop dates before 2000
     full_data = full_data[full_data[Column.JOIN_DATE.value] >= "2000-01-01"]
 
+    # Plot population pyramid (age by gender)
+    print("  Plotting population pyramid (age by gender)...")
+    fig = plot.plot_investors_population_pyramid(full_data)
+    save_plot(fig, "investors_population_pyramid.png")
+
+    # Plot other demographics
     demographics = [
         Column.STATE.value,
-        Column.GENDER.value,
         Column.PROFESSION.value,
         Column.MARITAL_STATUS.value,
-        Column.AGE.value,
     ]
 
     for demo in demographics:
-        if demo == Column.AGE:
-            continue
         print(f"  Plotting demographics: {demo}...")
 
         kind = "bar"
-        if demo == Column.GENDER.value:
-            kind = "pie"
-        elif demo in [Column.PROFESSION.value, Column.MARITAL_STATUS.value]:
+        if demo in [Column.PROFESSION.value, Column.MARITAL_STATUS.value]:
             kind = "barh"
 
         fig = plot.plot_investors_demographics(full_data, column=demo, chart_type=kind)

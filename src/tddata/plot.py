@@ -14,6 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import textwrap
 from typing import Optional
 
 import matplotlib.pyplot as plt
@@ -238,8 +239,6 @@ def _plot_demographics_pie(ax, counts: pd.Series):
 
 def _plot_demographics_barh(ax, counts: pd.Series, human_col: str):
     """Plot demographics data as a horizontal bar chart."""
-    import textwrap
-
     sns.barplot(
         x=counts.values,
         y=counts.index,
@@ -280,6 +279,93 @@ def _plot_demographics_bar(ax, counts: pd.Series, human_col: str, column: str):
 
     plt.xticks(rotation=45)
     sns.despine(ax=ax)
+
+
+def plot_investors_population_pyramid(data: pd.DataFrame):
+    """Plot a population pyramid showing age distribution by gender."""
+    # Filter and prepare data
+    pyramid_data = data[[Column.AGE.value, Column.GENDER.value]].copy()
+
+    # Map gender codes to labels
+    pyramid_data[Column.GENDER.value] = pyramid_data[Column.GENDER.value].map(
+        Gender.get_labels()
+    )
+
+    # Create age bins (5-year intervals)
+    max_age = int(pyramid_data[Column.AGE.value].max())
+    min_age = int(pyramid_data[Column.AGE.value].min())
+    bins = list(range(min_age - (min_age % 5), max_age + 5, 5))
+    labels = [f"{i}-{i + 4}" for i in bins[:-1]]
+
+    pyramid_data["age_group"] = pd.cut(
+        pyramid_data[Column.AGE.value], bins=bins, labels=labels, right=False
+    )
+
+    # Count by age group and gender
+    grouped = (
+        pyramid_data.groupby(["age_group", Column.GENDER.value])
+        .size()
+        .reset_index(name="count")
+    )
+
+    # Pivot to get male and female columns
+    pivoted = grouped.pivot(
+        index="age_group", columns=Column.GENDER.value, values="count"
+    ).fillna(0)
+
+    # Get labels for male and female (handle missing genders gracefully)
+    male_label = Gender.get_labels()[Gender.MALE.value]
+    female_label = Gender.get_labels()[Gender.FEMALE.value]
+
+    # Create the plot
+    f, ax = plt.subplots(figsize=(10, 8))
+
+    y_pos = range(len(pivoted))
+
+    # Plot males on the left (negative values)
+    if male_label in pivoted.columns:
+        ax.barh(
+            y_pos,
+            -pivoted[male_label],
+            height=0.8,
+            label=male_label,
+            color="steelblue",
+        )
+
+    # Plot females on the right (positive values)
+    if female_label in pivoted.columns:
+        ax.barh(
+            y_pos,
+            pivoted[female_label],
+            height=0.8,
+            label=female_label,
+            color="coral",
+        )
+
+    # Customize the plot
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(pivoted.index)
+    ax.set_xlabel("Number of Investors")
+    ax.set_ylabel("Age Group")
+    ax.set_title("Investors Population Pyramid by Age and Gender")
+
+    # Format x-axis to show absolute values
+    ax.xaxis.set_major_formatter(
+        ticker.FuncFormatter(lambda x, pos: human_format(abs(x), pos))
+    )
+
+    # Add vertical line at zero
+    ax.axvline(0, color="black", linewidth=0.8)
+
+    # Add legend
+    ax.legend(loc="upper right")
+
+    # Remove top and right spines
+    sns.despine(ax=ax)
+
+    _add_footer(f)
+    f.tight_layout()
+    return f
 
 
 def plot_investors_evolution(data: pd.DataFrame, freq: str = "ME"):
