@@ -1,8 +1,8 @@
 [project]
 name = "tddata"
-version = "0.2.2"
+version = "1.0.0"
 authors = [
-  { name="Daniel Komesu", email="daniel@dkko.me" },
+  { name="Komesu, D.K.", email="daniel@dkko.me" },
 ]
 description = "Easly download & read brazilian Tesouro Direto's data"
 license = { file = "LICENSE" }

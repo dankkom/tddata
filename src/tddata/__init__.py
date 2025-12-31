@@ -39,3 +39,5 @@ __all__ = [
     "AccountStatus",
     "TradedLast12Months",
 ]
+
+__version__ = "1.0.0"
