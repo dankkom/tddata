@@ -73,3 +73,4 @@ No heavy frameworks - keep it lightweight and data-focused.
 - `make_plots.py`: Complete example of download → read → plot workflow
 - `plot.py`: `_plot_value_over_time()` - canonical pattern for time-series by category
 - `reader.py`: Brazilian CSV parsing conventions (separators, decimals, dates)
+- `storage.py`: Utilities for file storage and naming conventions
