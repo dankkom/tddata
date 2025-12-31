@@ -16,9 +16,6 @@
 
 """Functions to download Tesouro Direto's historical data"""
 
-import datetime as dt
-import re
-import unicodedata
 from pathlib import Path
 from typing import Dict, List
 
@@ -26,18 +23,7 @@ import httpx
 from tqdm import tqdm
 
 from .constants import CKAN_API_URL, HTTP_HEADERS
-
-
-def slugify(value: str) -> str:
-    """
-    Normalizes string, converts to lowercase, removes non-alpha characters,
-    and converts spaces to hyphens.
-    """
-    value = (
-        unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
-    )
-    value = re.sub(r"[^\w\s-]", "", value).strip().lower()
-    return re.sub(r"[-\s]+", "-", value)
+from .storage import generate_filename
 
 
 def get_dataset_resources(dataset_id: str) -> List[Dict]:
@@ -73,28 +59,9 @@ def download(dest_dir: Path, dataset_id: str) -> List[Dict]:
             continue
 
         url = resource["url"]
-
-        # Determine filename
-        # Pattern: <dataset-name>@<modified-timestamp-in-iso-8601-format>.csv
-        # We use slugified resource name as <dataset-name> to ensure uniqueness within datasets
-
-        name_slug = slugify(resource["name"])
-
         last_modified_str = resource.get("last_modified") or resource.get("created")
-        if last_modified_str:
-            try:
-                # CKAN returns ISO format: 2025-12-04T12:59:45.172801
-                timestamp = dt.datetime.fromisoformat(last_modified_str)
 
-                # Compact ISO 8601 format: YYYYMMDDTHHMMSS
-                timestamp_str = timestamp.strftime("%Y%m%dT%H%M%S")
-            except ValueError:
-                # Fallback to current time
-                timestamp_str = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
-        else:
-            timestamp_str = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
-
-        filename = f"{name_slug}@{timestamp_str}.csv"
+        filename = generate_filename(resource["name"], last_modified_str)
         dest_filepath = dest_dir / filename
 
         # Check if file exists

@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-from tddata import downloader, plot, reader
+from tddata import plot, reader, storage
 from tddata.constants import Column
 
 # Set the style of the plot
@@ -36,13 +36,6 @@ PLOTS_DIR = Path("plots")
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def get_latest_file(data_dir: Path, pattern: str) -> Path:
-    files = list(data_dir.glob(pattern))
-    if not files:
-        return None
-    return sorted(files)[-1]
-
-
 def save_plot(fig, filename):
     filepath = PLOTS_DIR / filename
     print(f"Saving {filepath}...")
@@ -51,7 +44,7 @@ def save_plot(fig, filename):
 
 
 def run_prices(data_dir: Path):
-    f = get_latest_file(data_dir, "taxas-dos-titulos-ofertados*.csv")
+    f = storage.get_latest_file(data_dir, "taxas-dos-titulos-ofertados*.csv")
     if not f:
         print("No prices file found.")
         return
@@ -69,7 +62,7 @@ def run_prices(data_dir: Path):
 
     for bond_type in data[Column.BOND_TYPE.value].unique():
         # Clean filename friendly bond type
-        bond_slug = downloader.slugify(bond_type)
+        bond_slug = storage.slugify(bond_type)
         for var in variables:
             print(f"  Plotting {bond_type} - {var}...")
             try:
@@ -80,7 +73,7 @@ def run_prices(data_dir: Path):
 
 
 def run_stock(data_dir: Path):
-    f = get_latest_file(data_dir, "estoque-do-tesouro-direto*.csv")
+    f = storage.get_latest_file(data_dir, "estoque-do-tesouro-direto*.csv")
     if not f:
         print("No stock file found.")
         return
@@ -99,8 +92,13 @@ def run_stock(data_dir: Path):
 
 def run_investors(data_dir: Path):
     # Load all investors files
-    pattern = "investidores-do-tesouro-direto-*.csv"
-    files = sorted(list(data_dir.glob(pattern)))
+    # Use storage.get_latest_files to get the latest version of each year's file
+    # The pattern for investors is "investidores-do-tesouro-direto-YYYY@timestamp.csv"
+    # storage.get_latest_files handles the versioning correctly
+
+    all_files = storage.get_latest_files(data_dir)
+    files = [f for f in all_files if "investidores-do-tesouro-direto-" in f.name]
+
     if not files:
         print("No investors file found.")
         return
@@ -150,8 +148,10 @@ def run_investors(data_dir: Path):
 
 
 def run_operations(data_dir: Path):
-    pattern = "operacoes-do-tesouro-direto-*.csv"
-    files = sorted(list(data_dir.glob(pattern)))
+    # Use storage.get_latest_files to get the latest version of each year's file
+    all_files = storage.get_latest_files(data_dir)
+    files = [f for f in all_files if "operacoes-do-tesouro-direto-" in f.name]
+
     if not files:
         print("No operations file found.")
         return
@@ -171,7 +171,7 @@ def run_operations(data_dir: Path):
 
 
 def run_sales(data_dir: Path):
-    f = get_latest_file(data_dir, "vendas-do-tesouro-direto-*.csv")
+    f = storage.get_latest_file(data_dir, "vendas-do-tesouro-direto-*.csv")
     if not f:
         print("No sales file found.")
         return
@@ -185,7 +185,7 @@ def run_sales(data_dir: Path):
 
 
 def run_buybacks(data_dir: Path):
-    f = get_latest_file(data_dir, "recompras-do-tesouro-direto*.csv")
+    f = storage.get_latest_file(data_dir, "recompras-do-tesouro-direto*.csv")
     if not f:
         print("No buybacks file found.")
         return
@@ -199,7 +199,7 @@ def run_buybacks(data_dir: Path):
 
 
 def run_maturities(data_dir: Path):
-    f = get_latest_file(data_dir, "vencimentos-do-tesouro-direto*.csv")
+    f = storage.get_latest_file(data_dir, "vencimentos-do-tesouro-direto*.csv")
     if not f:
         print("No maturities file found.")
         return
@@ -213,7 +213,9 @@ def run_maturities(data_dir: Path):
 
 
 def run_interest_coupons(data_dir: Path):
-    f = get_latest_file(data_dir, "pagamento-de-cupom-de-juros-do-tesouro-direto*.csv")
+    f = storage.get_latest_file(
+        data_dir, "pagamento-de-cupom-de-juros-do-tesouro-direto*.csv"
+    )
     if not f:
         print("No interest coupons file found.")
         return
