@@ -139,6 +139,8 @@ fig4.show()
 
 ![Investor Demographics by Profession](./plots/investors_demographics_profession.png)
 
+See more visualizations in the [PLOTS.md](./PLOTS.md) file.
+
 ## 3. Data Source
 
 All data is fetched from the official **Tesouro Transparente** via their [CKAN API](https://www.tesourotransparente.gov.br/ckan/).
