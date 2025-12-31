@@ -74,7 +74,7 @@ class BondType(enum.Enum):
     PREFIXED = "Tesouro Prefixado"
 
     # Tesouro Prefixado com Juros Semestrais (NTN-F)
-    PREFIXED_WITH_SEMESTRAL_INTEREST = "Prefixado com Juros Semestrais"
+    PREFIXED_WITH_SEMESTRAL_INTEREST = "Tesouro Prefixado com Juros Semestrais"
 
     # Tesouro IPCA+ (NTN-B Principal)
     IPCA = "Tesouro IPCA+"
