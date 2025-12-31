@@ -14,11 +14,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import seaborn as sns
 import pandas as pd
+import seaborn as sns
 
 from tddata import downloader, plot, reader
 from tddata.constants import Column
@@ -31,13 +32,12 @@ plt.rcParams["xtick.labelsize"] = 8
 plt.rcParams["ytick.labelsize"] = 8
 plt.rcParams["legend.fontsize"] = 8
 
-DATA_DIR = Path("~/data/tddata").expanduser()
 PLOTS_DIR = Path("plots")
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def get_latest_file(pattern: str) -> Path:
-    files = list(DATA_DIR.glob(pattern))
+def get_latest_file(data_dir: Path, pattern: str) -> Path:
+    files = list(data_dir.glob(pattern))
     if not files:
         return None
     return sorted(files)[-1]
@@ -50,8 +50,8 @@ def save_plot(fig, filename):
     plt.close(fig)
 
 
-def run_prices():
-    f = get_latest_file("taxas-dos-titulos-ofertados*.csv")
+def run_prices(data_dir: Path):
+    f = get_latest_file(data_dir, "taxas-dos-titulos-ofertados*.csv")
     if not f:
         print("No prices file found.")
         return
@@ -79,8 +79,8 @@ def run_prices():
                 print(f"  Error plotting {bond_type} {var}: {e}")
 
 
-def run_stock():
-    f = get_latest_file("estoque-do-tesouro-direto*.csv")
+def run_stock(data_dir: Path):
+    f = get_latest_file(data_dir, "estoque-do-tesouro-direto*.csv")
     if not f:
         print("No stock file found.")
         return
@@ -97,10 +97,10 @@ def run_stock():
     save_plot(fig, "stock_evolution_total.png")
 
 
-def run_investors():
+def run_investors(data_dir: Path):
     # Load all investors files
     pattern = "investidores-do-tesouro-direto-*.csv"
-    files = sorted(list(DATA_DIR.glob(pattern)))
+    files = sorted(list(data_dir.glob(pattern)))
     if not files:
         print("No investors file found.")
         return
@@ -149,9 +149,9 @@ def run_investors():
     save_plot(fig, "investors_new_evolution_history.png")
 
 
-def run_operations():
+def run_operations(data_dir: Path):
     pattern = "operacoes-do-tesouro-direto-*.csv"
-    files = sorted(list(DATA_DIR.glob(pattern)))
+    files = sorted(list(data_dir.glob(pattern)))
     if not files:
         print("No operations file found.")
         return
@@ -170,8 +170,8 @@ def run_operations():
         save_plot(fig, "operations_evolution_by_type_history.png")
 
 
-def run_sales():
-    f = get_latest_file("vendas-do-tesouro-direto-*.csv")
+def run_sales(data_dir: Path):
+    f = get_latest_file(data_dir, "vendas-do-tesouro-direto-*.csv")
     if not f:
         print("No sales file found.")
         return
@@ -184,8 +184,8 @@ def run_sales():
     save_plot(fig, "sales_evolution_by_type.png")
 
 
-def run_buybacks():
-    f = get_latest_file("recompras-do-tesouro-direto*.csv")
+def run_buybacks(data_dir: Path):
+    f = get_latest_file(data_dir, "recompras-do-tesouro-direto*.csv")
     if not f:
         print("No buybacks file found.")
         return
@@ -198,8 +198,8 @@ def run_buybacks():
     save_plot(fig, "buybacks_evolution_by_type.png")
 
 
-def run_maturities():
-    f = get_latest_file("vencimentos-do-tesouro-direto*.csv")
+def run_maturities(data_dir: Path):
+    f = get_latest_file(data_dir, "vencimentos-do-tesouro-direto*.csv")
     if not f:
         print("No maturities file found.")
         return
@@ -212,8 +212,8 @@ def run_maturities():
     save_plot(fig, "maturities_evolution_by_type.png")
 
 
-def run_interest_coupons():
-    f = get_latest_file("pagamento-de-cupom-de-juros-do-tesouro-direto*.csv")
+def run_interest_coupons(data_dir: Path):
+    f = get_latest_file(data_dir, "pagamento-de-cupom-de-juros-do-tesouro-direto*.csv")
     if not f:
         print("No interest coupons file found.")
         return
@@ -227,15 +227,28 @@ def run_interest_coupons():
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Generate plots for Tesouro Direto data"
+    )
+    parser.add_argument(
+        "--data-dir",
+        type=str,
+        default="~/data/tddata",
+        help="Directory containing the data files (default: ~/data/tddata)",
+    )
+    args = parser.parse_args()
+
+    data_dir = Path(args.data_dir).expanduser()
+
     print("Starting plot generation...")
-    run_prices()
-    run_stock()
-    run_investors()
-    run_operations()
-    run_sales()
-    run_buybacks()
-    run_maturities()
-    run_interest_coupons()
+    run_prices(data_dir)
+    run_stock(data_dir)
+    run_investors(data_dir)
+    run_operations(data_dir)
+    run_sales(data_dir)
+    run_buybacks(data_dir)
+    run_maturities(data_dir)
+    run_interest_coupons(data_dir)
     print("Done!")
 
 
