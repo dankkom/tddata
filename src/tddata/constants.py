@@ -88,8 +88,8 @@ class BondType(enum.Enum):
     # Tesouro IGPM+ com Juros Semestrais (NTN-C)
     IGPM_WITH_SEMESTRAL_INTEREST = "Tesouro IGPM+ com Juros Semestrais"
 
-    # Tesouro RendA+
-    RENDA = "Tesouro RendA+"
+    # Tesouro RendA+ Aposentadoria Extra
+    RENDA = "Tesouro RendA+ Aposentadoria Extra"
 
     # Tesouro EducA+
     EDUCA = "Tesouro EducA+"
