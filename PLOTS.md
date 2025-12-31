@@ -21,11 +21,8 @@ This document presents visualizations of Brazilian Treasury Direct (Tesouro Dire
 
 These charts show the distribution of investors in the Tesouro Direto program across different demographic categories.
 
-### By Age
-![Investors Demographics - Age](plots/investors_demographics_age.png)
-
-### By Gender
-![Investors Demographics - Gender](plots/investors_demographics_gender.png)
+### By Age & Gender (Population Pyramid)
+![Investors Demographics - Age](plots/investors_population_pyramid.png)
 
 ### By Marital Status
 ![Investors Demographics - Marital Status](plots/investors_demographics_marital_status.png)
