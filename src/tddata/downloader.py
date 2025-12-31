@@ -84,25 +84,15 @@ def download(dest_dir: Path, dataset_id: str) -> List[Dict]:
         if last_modified_str:
             try:
                 # CKAN returns ISO format: 2025-12-04T12:59:45.172801
-                # Parsing logic
-                if "." in last_modified_str:
-                    # Truncate microseconds for cleaner filename if desired, or keep them.
-                    # User asked for ISO 8601.
-                    timestamp = dt.datetime.fromisoformat(last_modified_str)
-                else:
-                    timestamp = dt.datetime.fromisoformat(last_modified_str)
+                timestamp = dt.datetime.fromisoformat(last_modified_str)
 
-                # Format: YYYY-MM-DDTHH:MM:SS (standard ISO)
-                # However, colons might be problematic on some filesystems (Windows),
-                # but valid on Linux. User asked for ISO-8601.
-                # We will keep strict ISO format.
-                timestamp_str = timestamp.isoformat(timespec="seconds")
+                # Compact ISO 8601 format: YYYYMMDDTHHMMSS
+                timestamp_str = timestamp.strftime("%Y%m%dT%H%M%S")
             except ValueError:
-                # Fallback to current time or keep original string if it looks like a date?
-                # If parsing fails, use a safe default
-                timestamp_str = dt.datetime.now().isoformat(timespec="seconds")
+                # Fallback to current time
+                timestamp_str = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
         else:
-             timestamp_str = dt.datetime.now().isoformat(timespec="seconds")
+            timestamp_str = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
 
         filename = f"{name_slug}@{timestamp_str}.csv"
         dest_filepath = dest_dir / filename

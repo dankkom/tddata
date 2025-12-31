@@ -99,7 +99,7 @@ class TestDownloader(unittest.TestCase):
         results = downloader.download(self.test_dir, "fake-dataset")
 
         # Verify
-        expected_filename = "resource-1@2024-01-01T12:00:00.csv"
+        expected_filename = "resource-1@20240101T120000.csv"
         expected_path = self.test_dir / expected_filename
 
         self.assertTrue(expected_path.exists())
@@ -113,7 +113,7 @@ class TestDownloader(unittest.TestCase):
     @patch("tddata.downloader.get_dataset_resources")
     def test_download_skip_existing(self, mock_get_resources):
         # Set up an existing file
-        filename = "resource-1@2024-01-01T12:00:00.csv"
+        filename = "resource-1@20240101T120000.csv"
         filepath = self.test_dir / filename
         with open(filepath, "w") as f:
             f.write("existing content")
