@@ -76,7 +76,7 @@ from tddata import reader
 df_prices = reader.read_prices(
     Path(
         ".", "data",
-        "taxas-dos-titulos-ofertados-pelo-tesouro-direto@2025-12-30T10:20:10.csv"
+        "taxas-dos-titulos-ofertados-pelo-tesouro-direto@20251230T102010.csv"
     )
 )
 
@@ -84,7 +84,7 @@ df_prices = reader.read_prices(
 df_stock = reader.read_stock(
     Path(
         ".", "data",
-        "estoque-do-tesouro-direto@2025-12-01T10:20:18.csv"
+        "estoque-do-tesouro-direto@20251201T102018.csv"
     )
 )
 
@@ -92,7 +92,7 @@ df_stock = reader.read_stock(
 df_investors = reader.read_investors(
     Path(
         ".", "data",
-        "investidores-do-tesouro-direto-de-2024@2025-12-05T13:19:39.csv"
+        "investidores-do-tesouro-direto-de-2024@20251205T131939.csv"
     )
 )
 ```
