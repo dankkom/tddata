@@ -40,9 +40,17 @@ def set_parser():
     )
     parser.add_argument(
         "--dataset",
-        choices=["prices", "operations", "investors", "stock", "buybacks", "sales"],
+        choices=[
+            "prices",
+            "operations",
+            "investors",
+            "stock",
+            "buybacks",
+            "sales",
+            "all",
+        ],
         default="prices",
-        help="Dataset to download: 'prices', 'operations', 'investors', 'stock', 'buybacks' or 'sales'"
+        help="Dataset to download: 'prices', 'operations', 'investors', 'stock', 'buybacks', 'sales' or 'all'",
     )
     parser.add_argument("--verbose", action="store_true", default=False)
     return parser
@@ -61,4 +69,8 @@ def main():
         "sales": DATASET_SALES,
     }
 
-    downloader.download(args.output, dataset_id=dataset_map[args.dataset])
+    if args.dataset == "all":
+        for dataset_id in dataset_map.values():
+            downloader.download(args.output, dataset_id=dataset_id)
+    else:
+        downloader.download(args.output, dataset_id=dataset_map[args.dataset])
