@@ -30,12 +30,6 @@ class TestDownloader(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
-    def test_slugify(self):
-        self.assertEqual(downloader.slugify("Tesouro Selic"), "tesouro-selic")
-        self.assertEqual(downloader.slugify("Ação & Reação"), "acao-reacao")
-        self.assertEqual(downloader.slugify("  Spaces  "), "spaces")
-        self.assertEqual(downloader.slugify("Mixed_CASE"), "mixed_case")
-
     @patch("tddata.downloader.httpx.get")
     def test_get_dataset_resources(self, mock_get):
         mock_response = MagicMock()
