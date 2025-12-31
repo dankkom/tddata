@@ -38,13 +38,13 @@ All `read_*()` functions in `reader.py`:
 
 ## Development Workflow
 
-This project uses standard Python packaging and development practices. uv is the tool for managing virtual environments and dependencies.
+This project uses **uv** for package and virtual environment management. Do not use `pip` or `venv` directly unless necessary.
 
 ### Running & Testing
+- **Install dependencies**: `uv sync` or `uv pip install -e .`
 - **Generate all plots**: `uv run python make_plots.py` (requires data in `~/data/tddata/`)
-- **Run tests**: Standard unittest structure in `tests/`
-- **Install package**: `pip install -e .` or via git URL
-- **CLI usage**: `tddata [prices|stock|investors|operations|sales|buybacks] -o ./data`
+- **Run tests**: `uv run python -m unittest discover -s tests -p "test_*.py"`
+- **CLI usage**: `uv run tddata [prices|stock|investors|operations|sales|buybacks] -o ./data`
 
 ### Type Hints
 - Use `Optional[str]` for nullable string parameters (not `str = None`)
