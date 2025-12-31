@@ -31,7 +31,7 @@ plt.rcParams["xtick.labelsize"] = 8
 plt.rcParams["ytick.labelsize"] = 8
 plt.rcParams["legend.fontsize"] = 8
 
-DATA_DIR = Path("/home/dell/data/tddata")
+DATA_DIR = Path("~/data/tddata").expanduser()
 PLOTS_DIR = Path("plots")
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -106,9 +106,21 @@ def run_investors():
         return
 
     print(f"Loading {len(files)} investors files...")
-    # Use the last file for demographics (latest snapshot)
-    latest_file = files[-1]
-    data_latest = reader.read_investors(latest_file)
+    all_data = []
+    for f in files:
+        print(f"    Reading {f.name}...")
+        df = reader.read_investors(f)
+        all_data.append(df)
+
+    if not all_data:
+        return
+
+    full_data = pd.concat(all_data, ignore_index=True)
+    full_data = full_data.drop_duplicates(
+        subset=[Column.INVESTOR_ID.value, Column.JOIN_DATE.value]
+    )
+    # Drop dates before 2000
+    full_data = full_data[full_data[Column.JOIN_DATE.value] >= "2000-01-01"]
 
     demographics = [
         Column.STATE.value,
@@ -129,31 +141,12 @@ def run_investors():
         elif demo in [Column.PROFESSION.value, Column.MARITAL_STATUS.value]:
             kind = "barh"
 
-        fig = plot.plot_investors_demographics(
-            data_latest, column=demo, chart_type=kind
-        )
+        fig = plot.plot_investors_demographics(full_data, column=demo, chart_type=kind)
         save_plot(fig, f"investors_demographics_{demo}.png")
 
-    print("  Aggregating data for investors evolution...")
-
-    all_data = []
-    for f in files:
-        print(f"    Reading {f.name}...")
-        df = reader.read_investors(f)
-        all_data.append(df)
-
-    if all_data:
-        full_data = pd.concat(all_data, ignore_index=True)
-        full_data = full_data.drop_duplicates(
-            subset=[Column.INVESTOR_ID.value, Column.JOIN_DATE.value]
-        )
-        # Drop dates before 2000
-        full_data = full_data[full_data[Column.JOIN_DATE.value] >= "2000-01-01"]
-
-        print("  Plotting new investors evolution (all history)...")
-
-        fig = plot.plot_investors_evolution(full_data, freq="ME")
-        save_plot(fig, "investors_new_evolution_history.png")
+    print("  Plotting new investors evolution (all history)...")
+    fig = plot.plot_investors_evolution(full_data, freq="ME")
+    save_plot(fig, "investors_new_evolution_history.png")
 
 
 def run_operations():
