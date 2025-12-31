@@ -40,6 +40,7 @@ class TestPlot(unittest.TestCase):
                 Column.JOIN_DATE.value: [datetime(2024, 1, 1), datetime(2024, 1, 15)],
                 Column.STATE.value: ["SP", "RJ"],
                 Column.GENDER.value: ["M", "F"],
+                Column.AGE.value: [30, 25],
             }
         )
 
@@ -70,6 +71,14 @@ class TestPlot(unittest.TestCase):
             }
         )
 
+        self.maturities_data = pd.DataFrame(
+            {
+                Column.BUYBACK_DATE.value: [datetime(2024, 1, 1)],
+                Column.VALUE.value: [1000.0],
+                Column.BOND_TYPE.value: ["Type A"],
+            }
+        )
+
         self.prices_data = pd.DataFrame(
             {
                 Column.REFERENCE_DATE.value: [
@@ -93,10 +102,27 @@ class TestPlot(unittest.TestCase):
         fig = plot.plot_stock(self.stock_data)
         self.assertIsInstance(fig, plt.Figure)
 
+        fig = plot.plot_stock(self.stock_data, by_bond_type=False)
+        self.assertIsInstance(fig, plt.Figure)
+
     def test_plot_investors_demographics(self):
         fig = plot.plot_investors_demographics(
             self.investors_data, column=Column.STATE.value
         )
+        self.assertIsInstance(fig, plt.Figure)
+
+        fig = plot.plot_investors_demographics(
+            self.investors_data, column=Column.STATE.value, chart_type="pie"
+        )
+        self.assertIsInstance(fig, plt.Figure)
+
+        fig = plot.plot_investors_demographics(
+            self.investors_data, column=Column.STATE.value, chart_type="barh"
+        )
+        self.assertIsInstance(fig, plt.Figure)
+
+    def test_plot_investors_population_pyramid(self):
+        fig = plot.plot_investors_population_pyramid(self.investors_data)
         self.assertIsInstance(fig, plt.Figure)
 
     def test_plot_investors_evolution(self):
@@ -107,12 +133,24 @@ class TestPlot(unittest.TestCase):
         fig = plot.plot_operations(self.operations_data)
         self.assertIsInstance(fig, plt.Figure)
 
+        fig = plot.plot_operations(self.operations_data, by_type=False)
+        self.assertIsInstance(fig, plt.Figure)
+
     def test_plot_sales(self):
         fig = plot.plot_sales(self.sales_data)
         self.assertIsInstance(fig, plt.Figure)
 
     def test_plot_buybacks(self):
         fig = plot.plot_buybacks(self.buybacks_data)
+        self.assertIsInstance(fig, plt.Figure)
+
+    def test_plot_maturities(self):
+        fig = plot.plot_maturities(self.maturities_data)
+        self.assertIsInstance(fig, plt.Figure)
+
+    def test_plot_interest_coupons(self):
+        # Interest coupons uses same structure as maturities
+        fig = plot.plot_interest_coupons(self.maturities_data)
         self.assertIsInstance(fig, plt.Figure)
 
     def test_plot_prices(self):
