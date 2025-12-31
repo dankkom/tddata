@@ -15,5 +15,27 @@
 
 
 from . import downloader, plot, reader
+from .constants import (
+    AccountStatus,
+    BondType,
+    Channel,
+    Column,
+    Gender,
+    MaritalStatus,
+    OperationType,
+    TradedLast12Months,
+)
 
-__all__ = ["downloader", "plot", "reader"]
+__all__ = [
+    "downloader",
+    "plot",
+    "reader",
+    "Column",
+    "BondType",
+    "OperationType",
+    "Channel",
+    "Gender",
+    "MaritalStatus",
+    "AccountStatus",
+    "TradedLast12Months",
+]

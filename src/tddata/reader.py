@@ -37,7 +37,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from .constants import Column
+from .constants import (
+    AccountStatus,
+    Channel,
+    Column,
+    Gender,
+    TradedLast12Months,
+)
 
 
 def read_prices(filepath: Path) -> pd.DataFrame:
@@ -111,6 +117,26 @@ def read_investors(filepath: Path) -> pd.DataFrame:
             "Operou 12 Meses": Column.TRADED_LAST_12_MONTHS.value,
         }
     )
+
+    # Map categorical values to enum values for better semantics
+    # Keep original values for MaritalStatus as they're already descriptive
+
+    # Map gender codes to enum values
+    gender_map = {e.value: e.value for e in Gender}
+    data[Column.GENDER.value] = data[Column.GENDER.value].map(gender_map)
+
+    # Map account status codes to enum values
+    status_map = {e.value: e.value for e in AccountStatus}
+    data[Column.ACCOUNT_STATUS.value] = data[Column.ACCOUNT_STATUS.value].map(
+        status_map
+    )
+
+    # Map traded last 12 months codes to enum values
+    traded_map = {e.value: e.value for e in TradedLast12Months}
+    data[Column.TRADED_LAST_12_MONTHS.value] = data[
+        Column.TRADED_LAST_12_MONTHS.value
+    ].map(traded_map)
+
     return data
 
 
@@ -135,6 +161,11 @@ def read_operations(filepath: Path) -> pd.DataFrame:
             "Canal da Operacao": Column.CHANNEL.value,
         }
     )
+
+    # Map channel codes to enum values
+    channel_map = {e.value: e.value for e in Channel}
+    data[Column.CHANNEL.value] = data[Column.CHANNEL.value].map(channel_map)
+
     return data
 
 

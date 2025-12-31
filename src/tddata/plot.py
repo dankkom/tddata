@@ -21,7 +21,13 @@ import matplotlib.ticker as ticker
 import pandas as pd
 import seaborn as sns
 
-from .constants import Column, OperationType
+from .constants import (
+    AccountStatus,
+    Column,
+    Gender,
+    OperationType,
+    TradedLast12Months,
+)
 
 
 def human_format(num, pos):
@@ -160,7 +166,6 @@ def plot_stock(data: pd.DataFrame, by_bond_type: bool = True):
     sns.despine(ax=ax)
     f.tight_layout()
     return f
-    return f
 
 
 def plot_investors_demographics(
@@ -172,8 +177,19 @@ def plot_investors_demographics(
     """Plot distribution of investors by a categorical column (State, Gender, etc)."""
     f, ax = plt.subplots(figsize=(10, 6))
 
+    # Create a copy to avoid modifying original data
+    plot_data = data.copy()
+
+    # Map enum codes to human-readable labels for plotting
+    if column == Column.GENDER.value:
+        plot_data[column] = plot_data[column].map(Gender.get_labels())
+    elif column == Column.ACCOUNT_STATUS.value:
+        plot_data[column] = plot_data[column].map(AccountStatus.get_labels())
+    elif column == Column.TRADED_LAST_12_MONTHS.value:
+        plot_data[column] = plot_data[column].map(TradedLast12Months.get_labels())
+
     # Count frequency
-    counts = data[column].value_counts().head(top_n)
+    counts = plot_data[column].value_counts().head(top_n)
 
     human_col = _humanize_label(column)
 

@@ -113,6 +113,79 @@ class OperationType(enum.Enum):
         }
 
 
+class Channel(enum.Enum):
+    """Channel types for Tesouro Direto operations."""
+
+    SITE = "S"
+    HOMEBROKER = "H"
+
+    @classmethod
+    def get_labels(cls):
+        return {
+            cls.SITE.value: "Site",
+            cls.HOMEBROKER.value: "Homebroker",
+        }
+
+
+class MaritalStatus(enum.Enum):
+    """Marital status for Tesouro Direto investors."""
+
+    SINGLE = "Solteiro(a)"
+    SEPARATED = "Desquitado(a)"
+    WIDOWED = "Viúvo(a)"
+    DIVORCED = "Divorciado(a)"
+    MARRIED_BRAZILIAN_NATIVE = "Casado(a) com brasileiro(a) nato(a)"
+    MARRIED_BRAZILIAN_NATURALIZED = "Casado(a) com brasileiro(a) naturalizado(a)"
+    MARRIED_FOREIGNER = "Casado(a) com estrangeiro(a)"
+    STABLE_UNION = "União estável"
+    LEGALLY_SEPARATED = "Separado judic."
+    NOT_APPLICABLE = "Não se aplica"
+
+
+class Gender(enum.Enum):
+    """Gender for Tesouro Direto investors."""
+
+    MALE = "M"
+    FEMALE = "F"
+    NOT_APPLICABLE = "N"
+
+    @classmethod
+    def get_labels(cls):
+        return {
+            cls.MALE.value: "Masculino",
+            cls.FEMALE.value: "Feminino",
+            cls.NOT_APPLICABLE.value: "Não se aplica",
+        }
+
+
+class AccountStatus(enum.Enum):
+    """Account status for Tesouro Direto investors."""
+
+    ACTIVE = "A"
+    DEACTIVATED = "D"
+
+    @classmethod
+    def get_labels(cls):
+        return {
+            cls.ACTIVE.value: "Ativo",
+            cls.DEACTIVATED.value: "Desativado",
+        }
+
+
+class TradedLast12Months(enum.Enum):
+    """Traded in last 12 months for Tesouro Direto investors."""
+
+    YES = "S"
+    NO = "N"
+
+    @classmethod
+    def get_labels(cls):
+        return {
+            cls.YES.value: "Sim",
+            cls.NO.value: "Não",
+        }
+
+
 CKAN_API_URL = "https://www.tesourotransparente.gov.br/ckan/api/3/action/package_show"
 
 DATASET_PRICES_RATES = "taxas-dos-titulos-ofertados-pelo-tesouro-direto"
