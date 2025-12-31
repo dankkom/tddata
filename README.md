@@ -114,12 +114,8 @@ fig1.show()
 fig2 = plot.plot_stock(df_stock, by_bond_type=True)
 fig2.show()
 
-# 3. Plot Investor Demographics (e.g., Gender Pie Chart)
-fig3 = plot.plot_investors_demographics(
-    df_investors,
-    column=Column.GENDER.value,
-    chart_type="pie",
-)
+# 3. Plot Investor Demographics (e.g., Population Pyramid)
+fig3 = plot.plot_investors_population_pyramid(df_investors)
 fig3.show()
 
 # 4. Plot Investor Demographics (e.g., Profession Horizontal Bar)
@@ -135,7 +131,7 @@ fig4.show()
 
 ![Stock Evolution](./plots/stock_evolution_by_type.png)
 
-![Investor Demographics by Gender](./plots/investors_demographics_gender.png)
+![Investor Demographics by Age & Gender](./plots/investors_population_pyramid.png)
 
 ![Investor Demographics by Profession](./plots/investors_demographics_profession.png)
 
