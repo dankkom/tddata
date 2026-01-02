@@ -203,3 +203,49 @@ HTTP_HEADERS = {
         "Safari/537.3"
     ),
 }
+
+
+# Bond type name normalization mapping
+# Maps various bond type names found in datasets to standardized names
+BOND_TYPE_NORMALIZATION = {
+    # Legacy code
+    "NTN-B1": "Tesouro RendA+",
+    # Case variations
+    "Tesouro Renda+ Aposentadoria Extra": "Tesouro RendA+",
+    "Tesouro Educa+": "Tesouro EducA+",
+    # Already standardized (identity mapping for completeness)
+    "Tesouro Selic": "Tesouro Selic",
+    "Tesouro Prefixado": "Tesouro Prefixado",
+    "Tesouro Prefixado com Juros Semestrais": "Tesouro Prefixado com Juros Semestrais",
+    "Tesouro IPCA+": "Tesouro IPCA+",
+    "Tesouro IPCA+ com Juros Semestrais": "Tesouro IPCA+ com Juros Semestrais",
+    "Tesouro IGPM+ com Juros Semestrais": "Tesouro IGPM+ com Juros Semestrais",
+    "Tesouro RendA+": "Tesouro RendA+",
+    "Tesouro EducA+": "Tesouro EducA+",
+}
+
+
+def normalize_bond_type(bond_type_name: str) -> str | None:
+    """
+    Normalize bond type name to standardized format.
+
+    Args:
+        bond_type_name: The bond type name from the dataset
+
+    Returns:
+        Standardized bond type name, or the original if no mapping exists
+    """
+    if not bond_type_name:
+        return
+
+    # Try exact match first
+    if bond_type_name in BOND_TYPE_NORMALIZATION:
+        return BOND_TYPE_NORMALIZATION[bond_type_name]
+
+    # Try case-insensitive match
+    for key, value in BOND_TYPE_NORMALIZATION.items():
+        if key.lower() == bond_type_name.lower():
+            return value
+
+    # Return original if no mapping found (with warning potential)
+    return bond_type_name

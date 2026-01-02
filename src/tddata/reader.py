@@ -35,6 +35,7 @@ from .constants import (
     Column,
     Gender,
     TradedLast12Months,
+    normalize_bond_type,
 )
 
 
@@ -75,6 +76,9 @@ def read_prices(filepath: Path) -> pd.DataFrame:
             "PU Venda Manha": Column.SELL_PRICE.value,
             "PU Base Manha": Column.BASE_PRICE.value,
         }
+    )
+    data[Column.BOND_TYPE.value] = data[Column.BOND_TYPE.value].apply(
+        normalize_bond_type
     )
     return data
 
@@ -117,6 +121,9 @@ def read_stock(filepath: Path) -> pd.DataFrame:
             "Quantidade": Column.QUANTITY.value,
             "Valor Estoque": Column.STOCK_VALUE.value,
         }
+    )
+    data[Column.BOND_TYPE.value] = data[Column.BOND_TYPE.value].apply(
+        normalize_bond_type
     )
     return data
 
@@ -232,6 +239,10 @@ def read_operations(filepath: Path) -> pd.DataFrame:
     channel_map = {e.value: e.value for e in Channel}
     data[Column.CHANNEL.value] = data[Column.CHANNEL.value].map(channel_map)
 
+    data[Column.BOND_TYPE.value] = data[Column.BOND_TYPE.value].apply(
+        normalize_bond_type
+    )
+
     return data
 
 
@@ -269,6 +280,9 @@ def read_sales(filepath: Path) -> pd.DataFrame:
             "Valor": Column.VALUE.value,
         }
     )
+    data[Column.BOND_TYPE.value] = data[Column.BOND_TYPE.value].apply(
+        normalize_bond_type
+    )
     return data
 
 
@@ -303,6 +317,9 @@ def read_buybacks(filepath: Path) -> pd.DataFrame:
             "Quantidade": Column.QUANTITY.value,
             "Valor": Column.VALUE.value,
         }
+    )
+    data[Column.BOND_TYPE.value] = data[Column.BOND_TYPE.value].apply(
+        normalize_bond_type
     )
     return data
 
@@ -340,6 +357,9 @@ def read_maturities(filepath: Path) -> pd.DataFrame:
             "Quantidade": Column.QUANTITY.value,
             "Valor": Column.VALUE.value,
         }
+    )
+    data[Column.BOND_TYPE.value] = data[Column.BOND_TYPE.value].apply(
+        normalize_bond_type
     )
     return data
 
