@@ -146,6 +146,33 @@ class TestReader(unittest.TestCase):
             pd.api.types.is_datetime64_any_dtype(df[Column.REFERENCE_DATE.value])
         )
 
+    def test_read_chunked(self):
+        content = (
+            "Codigo do Investidor;Data de Adesao;Estado Civil;Genero;Profissao;Idade;UF do Investidor;Cidade do Investidor;Pais do Investidor;Situacao da Conta;Operou 12 Meses\n"
+            "1;01/01/2024;Solteiro;M;Engenheiro;30;SP;Sao Paulo;BR;Ativa;S\n"
+            "2;02/01/2024;Casado;F;Advogada;35;RJ;Rio de Janeiro;BR;Ativa;N"
+        )
+        filepath = self.create_csv_file("investors_chunked.csv", content)
+
+        # Read with chunksize=1
+        iterator = reader.read_investors(filepath, chunksize=1)
+        # Check if it is an iterator (generator)
+        self.assertTrue(iter(iterator) is iterator)
+
+        chunks = list(iterator)
+        self.assertEqual(len(chunks), 2)
+
+        df = pd.concat(chunks)
+        self.assertEqual(len(df), 2)
+        self.assertEqual(df.iloc[0][Column.INVESTOR_ID.value], 1)
+        self.assertEqual(df.iloc[1][Column.INVESTOR_ID.value], 2)
+
+        # Verify processing happened on chunks (checking column renaming and types)
+        self.assertIn(Column.INVESTOR_ID.value, df.columns)
+        self.assertTrue(
+            pd.api.types.is_datetime64_any_dtype(df[Column.JOIN_DATE.value])
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
