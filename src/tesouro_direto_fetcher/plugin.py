@@ -6,13 +6,11 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 from pathlib import Path
 from typing import Annotated
 
 import typer
-from rich.console import Console
-from rich.logging import RichHandler
+from quantilica_core.cli import get_console, setup_rich_logging
 from rich.rule import Rule
 from rich.table import Table
 
@@ -29,7 +27,7 @@ from tesouro_direto_fetcher.constants import (
 app = typer.Typer(help="Dados do Tesouro Direto (preços, taxas, operações).")
 
 _DEFAULT_OUTPUT = Path("/data/tesouro-direto")
-console = Console()
+console = get_console()
 
 _DATASET_MAP = {
     "prices": DATASET_PRICES_RATES,
@@ -42,19 +40,6 @@ _DATASET_MAP = {
 _DATASET_CHOICES = [*_DATASET_MAP, "all"]
 
 
-def _setup_logging(verbose: bool) -> None:
-    """Configura logging via RichHandler para não quebrar barras de progresso.
-
-    verbose=False → WARNING apenas; verbose=True → DEBUG via Rich console.
-    """
-    level = logging.DEBUG if verbose else logging.WARNING
-    logging.basicConfig(
-        level=level,
-        format="%(message)s",
-        datefmt="[%X]",
-        handlers=[RichHandler(console=console, show_path=False)],
-        force=True,
-    )
 
 
 def _resolve_ids(name: str) -> list[str]:
@@ -104,7 +89,7 @@ def cmd_sync(
     ] = False,
 ) -> None:
     """Sincronizar datasets do Tesouro Direto."""
-    _setup_logging(verbose)
+    setup_rich_logging(verbose, console=console)
     if dataset not in _DATASET_CHOICES:
         console.print(
             f"[red]Erro:[/red] dataset inválido '{dataset}'."
@@ -163,7 +148,7 @@ def cmd_convert(
     ] = False,
 ) -> None:
     """Converter CSVs mais recentes para Parquet (requer extras de análise)."""
-    _setup_logging(verbose)
+    setup_rich_logging(verbose, console=console)
     _convert_dir(data_dir)
 
 
@@ -211,7 +196,7 @@ def cmd_pipeline(
     ] = False,
 ) -> None:
     """Pipeline completo do Tesouro Direto (sync → convert)."""
-    _setup_logging(verbose)
+    setup_rich_logging(verbose, console=console)
     if dataset not in _DATASET_CHOICES:
         console.print(
             f"[red]Erro:[/red] dataset inválido '{dataset}'."
