@@ -102,15 +102,11 @@ async def _run_dry_run(args):
         print(f"Grand total resources: {grand_count}")
         print(f"Grand would download: {grand_would_download}")
         mb = grand_total_size / (1024 * 1024)
-        print(
-            f"Grand total size: {grand_total_size:,} bytes ({mb:.2f} MB)"
-        )
+        print(f"Grand total size: {grand_total_size:,} bytes ({mb:.2f} MB)")
         return
 
     dataset_id = DATASET_MAP[args.dataset]
-    info_list = await downloader.get_download_info(
-        args.output, dataset_id=dataset_id
-    )
+    info_list = await downloader.get_download_info(args.output, dataset_id=dataset_id)
     _print_info_list(info_list)
 
 
@@ -135,9 +131,7 @@ def cmd_convert(args) -> int:
         from . import converter
     except ImportError:
         logger.error("Convert feature requires analysis extras.")
-        logger.error(
-            "Install with: pip install tesouro-direto-fetcher[analysis]"
-        )
+        logger.error("Install with: pip install tesouro-direto-fetcher[analysis]")
         return 1
 
     data_dir: Path = args.data_dir
@@ -157,9 +151,7 @@ def cmd_convert(args) -> int:
         latest_files = repo.get_all_latest_files(dataset_id)
         if not latest_files:
             continue
-        logger.info(
-            f"Converting {len(latest_files)} files from {dataset_id}..."
-        )
+        logger.info(f"Converting {len(latest_files)} files from {dataset_id}...")
         for fp in latest_files:
             try:
                 output_path = converter.convert_to_parquet(fp)

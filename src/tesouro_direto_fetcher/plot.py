@@ -34,7 +34,9 @@ def plot_prices(data: pl.DataFrame, bond_type: str, variable: str) -> alt.Chart:
         variable_description = "Base Price (R$)"
 
     # Format maturity dates for legend
-    subset = subset.with_columns(pl.col(C.MATURITY_DATE.value).dt.strftime("%b/%Y").alias("maturity_formatted"))
+    subset = subset.with_columns(
+        pl.col(C.MATURITY_DATE.value).dt.strftime("%b/%Y").alias("maturity_formatted")
+    )
 
     # Build an explicit ordered list of maturities (formatted labels) sorted by the
     # actual maturity date so the legend is chronological rather than alphabetical.
@@ -111,7 +113,9 @@ def plot_stock(data: pl.DataFrame, by_bond_type: bool = True) -> alt.Chart:
                 tooltip=[
                     alt.Tooltip(f"{C.STOCK_MONTH.value}:T", title="Date"),
                     alt.Tooltip(f"{C.BOND_TYPE.value}:N", title="Bond Type"),
-                    alt.Tooltip(f"{C.STOCK_VALUE.value}:Q", title="Value", format=",.0f"),
+                    alt.Tooltip(
+                        f"{C.STOCK_VALUE.value}:Q", title="Value", format=",.0f"
+                    ),
                 ],
             )
         )
@@ -128,7 +132,9 @@ def plot_stock(data: pl.DataFrame, by_bond_type: bool = True) -> alt.Chart:
                 ),
                 tooltip=[
                     alt.Tooltip(f"{C.STOCK_MONTH.value}:T", title="Date"),
-                    alt.Tooltip(f"{C.STOCK_VALUE.value}:Q", title="Value", format=",.0f"),
+                    alt.Tooltip(
+                        f"{C.STOCK_VALUE.value}:Q", title="Value", format=",.0f"
+                    ),
                 ],
             )
         )
@@ -233,7 +239,9 @@ def plot_investors_population_pyramid(data: pl.DataFrame) -> alt.Chart:
             ]
         ).with_columns(
             pl.lit(male_label).alias("gender"),
-            (pl.col("count") * -1).cast(pl.Int64).alias("count"),  # Negative for left side
+            (pl.col("count") * -1)
+            .cast(pl.Int64)
+            .alias("count"),  # Negative for left side
         )
     else:
         male_data = pl.DataFrame(
@@ -267,7 +275,9 @@ def plot_investors_population_pyramid(data: pl.DataFrame) -> alt.Chart:
 
     # Extract explicit age group order from the pivoted data to make visualization
     # resilient to any DataFrame row ordering changes later.
-    age_order = pivoted["age_group"].to_list() if "age_group" in pivoted.columns else None
+    age_order = (
+        pivoted["age_group"].to_list() if "age_group" in pivoted.columns else None
+    )
 
     chart = (
         alt.Chart(combined)
@@ -360,7 +370,9 @@ def plot_operations(data: pl.DataFrame, by_type: bool = True) -> alt.Chart:
                 tooltip=[
                     alt.Tooltip("month:T", title="Date"),
                     alt.Tooltip(f"{C.OPERATION_TYPE.value}:N", title="Type"),
-                    alt.Tooltip(f"{C.OPERATION_VALUE.value}:Q", title="Value", format=",.0f"),
+                    alt.Tooltip(
+                        f"{C.OPERATION_VALUE.value}:Q", title="Value", format=",.0f"
+                    ),
                 ],
             )
         )
@@ -377,7 +389,9 @@ def plot_operations(data: pl.DataFrame, by_type: bool = True) -> alt.Chart:
                 ),
                 tooltip=[
                     alt.Tooltip("month:T", title="Date"),
-                    alt.Tooltip(f"{C.OPERATION_VALUE.value}:Q", title="Value", format=",.0f"),
+                    alt.Tooltip(
+                        f"{C.OPERATION_VALUE.value}:Q", title="Value", format=",.0f"
+                    ),
                 ],
             )
         )
@@ -493,7 +507,9 @@ def _plot_value_over_time(
     Returns:
         Altair Chart object
     """
-    grouped = analytics.aggregate_value_over_time(data, date_col, value_col, group_col=hue_col, freq=freq)
+    grouped = analytics.aggregate_value_over_time(
+        data, date_col, value_col, group_col=hue_col, freq=freq
+    )
 
     if hue_col:
         chart = (

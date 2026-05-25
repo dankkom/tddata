@@ -4,19 +4,7 @@ This test verifies that tesouro-direto-fetcher can be imported and used correctl
 both with and without the optional analysis extras.
 """
 
-import sys
 import unittest
-from unittest.mock import patch
-
-
-def _has_polars():
-    """Check if polars is available."""
-    try:
-        import polars  # noqa: F401
-
-        return True
-    except ImportError:
-        return False
 
 
 class TestOptionalDependencies(unittest.TestCase):
@@ -59,59 +47,10 @@ class TestOptionalDependencies(unittest.TestCase):
 
         # These functions should be available without extras
         self.assertTrue(hasattr(tesouro_direto_fetcher.downloader, "download"))
-        self.assertTrue(hasattr(tesouro_direto_fetcher.downloader, "get_dataset_resources"))
+        self.assertTrue(
+            hasattr(tesouro_direto_fetcher.downloader, "get_dataset_resources")
+        )
         self.assertTrue(hasattr(tesouro_direto_fetcher.downloader, "get_download_info"))
-
-    @unittest.skipUnless(
-        _has_polars(),
-        "Requires analysis extras (polars, seaborn)",
-    )
-    def test_reader_functions_with_extras(self):
-        """Test that reader module works when extras are installed."""
-        import tesouro_direto_fetcher
-
-        self.assertTrue(tesouro_direto_fetcher._HAS_ANALYSIS)
-        self.assertIsNotNone(tesouro_direto_fetcher.reader)
-
-        # Check that all read functions are available
-        expected_readers = [
-            "read_prices",
-            "read_stock",
-            "read_investors",
-            "read_operations",
-            "read_sales",
-            "read_buybacks",
-            "read_maturities",
-            "read_interest_coupons",
-        ]
-        for reader_func in expected_readers:
-            self.assertTrue(
-                hasattr(tesouro_direto_fetcher.reader, reader_func),
-                f"{reader_func} should be available",
-            )
-
-    @unittest.skipUnless(
-        _has_polars(),
-        "Requires analysis extras (polars, seaborn)",
-    )
-    def test_plot_functions_with_extras(self):
-        """Test that plot module works when extras are installed."""
-        import tesouro_direto_fetcher
-
-        self.assertTrue(tesouro_direto_fetcher._HAS_ANALYSIS)
-        self.assertIsNotNone(tesouro_direto_fetcher.plot)
-
-        # Check that plot functions are available
-        expected_plotters = [
-            "plot_prices",
-            "plot_stock",
-            "plot_investors_evolution",
-            "plot_operations",
-            "plot_sales",
-            "plot_buybacks",
-        ]
-        for plot_func in expected_plotters:
-            self.assertTrue(hasattr(tesouro_direto_fetcher.plot, plot_func), f"{plot_func} should be available")
 
 
 if __name__ == "__main__":

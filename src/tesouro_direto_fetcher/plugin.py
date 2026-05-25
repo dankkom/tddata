@@ -40,8 +40,6 @@ _DATASET_MAP = {
 _DATASET_CHOICES = [*_DATASET_MAP, "all"]
 
 
-
-
 def _resolve_ids(name: str) -> list[str]:
     if name == "all":
         return list(_DATASET_MAP.values())
@@ -55,9 +53,7 @@ def _print_info(info_list: list[dict]) -> None:
     t.add_column("Download?", justify="center")
 
     for info in info_list:
-        size_str = (
-            f"{info['size']:,} bytes" if info["size"] else "desconhecido"
-        )
+        size_str = f"{info['size']:,} bytes" if info["size"] else "desconhecido"
         flag = (
             "[green]Sim[/green]"
             if info["would_download"]
@@ -84,9 +80,7 @@ def cmd_sync(
     dry_run: Annotated[
         bool, typer.Option("--dry-run", help="Listar sem baixar")
     ] = False,
-    verbose: Annotated[
-        bool, typer.Option("--verbose", help="Logs detalhados")
-    ] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", help="Logs detalhados")] = False,
 ) -> None:
     """Sincronizar datasets do Tesouro Direto."""
     setup_rich_logging(verbose, console=console)
@@ -130,8 +124,7 @@ def cmd_sync(
         console.print("[yellow]Download cancelado.[/yellow]")
         raise typer.Exit(code=130) from None
     console.print(
-        f"[green]✓[/green] [bold]{dataset}[/bold] sincronizado em"
-        f" [dim]{output}[/dim]"
+        f"[green]✓[/green] [bold]{dataset}[/bold] sincronizado em [dim]{output}[/dim]"
     )
 
 
@@ -139,13 +132,9 @@ def cmd_sync(
 def cmd_convert(
     data_dir: Annotated[
         Path,
-        typer.Argument(
-            help="Diretório de dados (raiz da árvore <dataset_id>/)"
-        ),
+        typer.Argument(help="Diretório de dados (raiz da árvore <dataset_id>/)"),
     ],
-    verbose: Annotated[
-        bool, typer.Option("--verbose", help="Logs detalhados")
-    ] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", help="Logs detalhados")] = False,
 ) -> None:
     """Converter CSVs mais recentes para Parquet (requer extras de análise)."""
     setup_rich_logging(verbose, console=console)
@@ -165,18 +154,14 @@ def _convert_dir(data_dir: Path) -> None:
         raise typer.Exit(1) from None
 
     if not data_dir.is_dir():
-        console.print(
-            f"[red]Erro:[/red] diretório '{data_dir}' não existe."
-        )
+        console.print(f"[red]Erro:[/red] diretório '{data_dir}' não existe.")
         raise typer.Exit(1)
 
     repo = DataRepository(data_dir)
     for dataset_id in repo.list_datasets():
         for fp in repo.get_all_latest_files(dataset_id):
             output_path = converter.convert_to_parquet(fp)
-            console.print(
-                f"  [green]✓[/green] {fp.name} → {output_path.name}"
-            )
+            console.print(f"  [green]✓[/green] {fp.name} → {output_path.name}")
 
 
 @app.command("pipeline")
@@ -191,9 +176,7 @@ def cmd_pipeline(
             help=f"Dataset ({', '.join(_DATASET_CHOICES)})",
         ),
     ] = "all",
-    verbose: Annotated[
-        bool, typer.Option("--verbose", help="Logs detalhados")
-    ] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", help="Logs detalhados")] = False,
 ) -> None:
     """Pipeline completo do Tesouro Direto (sync → convert)."""
     setup_rich_logging(verbose, console=console)

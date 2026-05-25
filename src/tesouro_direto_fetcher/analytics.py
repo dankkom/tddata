@@ -20,17 +20,25 @@ def aggregate_stock(data: pl.DataFrame, by_bond_type: bool = True) -> pl.DataFra
             .agg(pl.col(C.STOCK_VALUE.value).sum())
             .sort([C.STOCK_MONTH.value, C.BOND_TYPE.value])
         )
-    return data.group_by(C.STOCK_MONTH.value).agg(pl.col(C.STOCK_VALUE.value).sum()).sort(C.STOCK_MONTH.value)
+    return (
+        data.group_by(C.STOCK_MONTH.value)
+        .agg(pl.col(C.STOCK_VALUE.value).sum())
+        .sort(C.STOCK_MONTH.value)
+    )
 
 
 def prepare_prices(data: pl.DataFrame, bond_type: str) -> pl.DataFrame:
     """Filter and sort prices data for plotting."""
     return data.filter(
-        (pl.col(C.BOND_TYPE.value) == bond_type) & (pl.col(C.BUY_PRICE.value) > 0) & (pl.col(C.SELL_PRICE.value) > 0)
+        (pl.col(C.BOND_TYPE.value) == bond_type)
+        & (pl.col(C.BUY_PRICE.value) > 0)
+        & (pl.col(C.SELL_PRICE.value) > 0)
     ).sort([C.MATURITY_DATE.value, C.REFERENCE_DATE.value])
 
 
-def prepare_demographics_counts(data: pl.DataFrame, column: str, top_n: int = 15) -> pl.DataFrame:
+def prepare_demographics_counts(
+    data: pl.DataFrame, column: str, top_n: int = 15
+) -> pl.DataFrame:
     """Get value counts for demographics data with human readable labels.
 
     Returns a DataFrame with columns: [column_name, count] sorted by count descending.
@@ -113,7 +121,9 @@ def prepare_population_pyramid(data: pl.DataFrame) -> pl.DataFrame:
 
     # Remove null age groups and compute ordering from numeric lower bound
     pivoted = pivoted.filter(pl.col("age_group").is_not_null())
-    order_map = {row["age_group"]: _lower_bound(row["age_group"]) for row in pivoted.to_dicts()}
+    order_map = {
+        row["age_group"]: _lower_bound(row["age_group"]) for row in pivoted.to_dicts()
+    }
 
     pivoted = (
         pivoted.with_columns(
@@ -147,16 +157,22 @@ def aggregate_new_investors(data: pl.DataFrame, freq: str = "1mo") -> pl.DataFra
         df = df.sort(C.JOIN_DATE.value)
 
     return (
-        df.group_by_dynamic(C.JOIN_DATE.value, every=freq).agg(pl.len().alias("new_investors")).sort(C.JOIN_DATE.value)
+        df.group_by_dynamic(C.JOIN_DATE.value, every=freq)
+        .agg(pl.len().alias("new_investors"))
+        .sort(C.JOIN_DATE.value)
     )
 
 
 def aggregate_operations(data: pl.DataFrame, by_type: bool = True) -> pl.DataFrame:
     """Aggregate operations by month and optionally type."""
-    df = data.with_columns(pl.col(C.OPERATION_DATE.value).dt.truncate("1mo").alias("month"))
+    df = data.with_columns(
+        pl.col(C.OPERATION_DATE.value).dt.truncate("1mo").alias("month")
+    )
 
     if by_type:
-        df = df.with_columns(pl.col(C.OPERATION_TYPE.value).replace(OperationType.get_labels()))
+        df = df.with_columns(
+            pl.col(C.OPERATION_TYPE.value).replace(OperationType.get_labels())
+        )
         return (
             df.group_by(["month", C.OPERATION_TYPE.value])
             .agg(pl.col(C.OPERATION_VALUE.value).sum())
@@ -167,7 +183,11 @@ def aggregate_operations(data: pl.DataFrame, by_type: bool = True) -> pl.DataFra
 
 
 def aggregate_value_over_time(
-    data: pl.DataFrame, date_col: str, value_col: str, group_col: str | None = None, freq: str = "1mo"
+    data: pl.DataFrame,
+    date_col: str,
+    value_col: str,
+    group_col: str | None = None,
+    freq: str = "1mo",
 ) -> pl.DataFrame:
     """Generic aggregation of value over time.
 
@@ -184,7 +204,11 @@ def aggregate_value_over_time(
     if freq == "1mo":
         df = df.with_columns(pl.col(date_col).dt.truncate("1mo").alias("month"))
         if group_col:
-            return df.group_by(["month", group_col]).agg(pl.col(value_col).sum()).sort(["month", group_col])
+            return (
+                df.group_by(["month", group_col])
+                .agg(pl.col(value_col).sum())
+                .sort(["month", group_col])
+            )
         return df.group_by("month").agg(pl.col(value_col).sum()).sort("month")
 
     # For other frequencies (e.g., '6mo'), use group_by_dynamic which requires sorted input
@@ -194,7 +218,9 @@ def aggregate_value_over_time(
 
     if group_col:
         # Use the new `group_by` argument name (replaces deprecated `by`)
-        res = df.group_by_dynamic(date_col, every=freq, group_by=group_col).agg(pl.col(value_col).sum())
+        res = df.group_by_dynamic(date_col, every=freq, group_by=group_col).agg(
+            pl.col(value_col).sum()
+        )
         # Rename the grouping column to 'month' for consistency
         if date_col in res.columns:
             res = res.rename({date_col: "month"})
@@ -260,8 +286,12 @@ def calculate_operations_returns(
     current_date_dt = datetime(current_date.year, current_date.month, current_date.day)
 
     # Separate buys and sells
-    buy_records = operations.filter(pl.col(C.OPERATION_TYPE.value) == OperationType.BUY.value).to_dicts()
-    sell_records = operations.filter(pl.col(C.OPERATION_TYPE.value) == OperationType.SELL.value).to_dicts()
+    buy_records = operations.filter(
+        pl.col(C.OPERATION_TYPE.value) == OperationType.BUY.value
+    ).to_dicts()
+    sell_records = operations.filter(
+        pl.col(C.OPERATION_TYPE.value) == OperationType.SELL.value
+    ).to_dicts()
 
     if not buy_records:
         return pl.DataFrame()
@@ -345,7 +375,9 @@ def calculate_operations_returns(
 
             buy_qty_original = float(buy_rec.get(C.QUANTITY.value) or 0.0)
             buy_value_original = float(buy_rec.get(C.OPERATION_VALUE.value) or 0.0)
-            unit_buy_price = buy_value_original / buy_qty_original if buy_qty_original > 0 else 0.0
+            unit_buy_price = (
+                buy_value_original / buy_qty_original if buy_qty_original > 0 else 0.0
+            )
 
             closed = {
                 C.INVESTOR_ID.value: buy_rec.get(C.INVESTOR_ID.value),
@@ -378,7 +410,9 @@ def calculate_operations_returns(
 
             buy_qty_original = float(rec.get(C.QUANTITY.value) or 0.0)
             buy_value_original = float(rec.get(C.OPERATION_VALUE.value) or 0.0)
-            unit_buy_price = buy_value_original / buy_qty_original if buy_qty_original > 0 else 0.0
+            unit_buy_price = (
+                buy_value_original / buy_qty_original if buy_qty_original > 0 else 0.0
+            )
 
             buy_date = rec[C.OPERATION_DATE.value]
             if isinstance(buy_date, date) and not isinstance(buy_date, datetime):
@@ -409,7 +443,10 @@ def calculate_operations_returns(
         for lot in all_lots:
             bond_coupons = coupons.filter(
                 (pl.col(C.BOND_TYPE.value) == lot[C.BOND_TYPE.value])
-                & (pl.col(C.MATURITY_DATE.value) == lot.get("_maturity_date_key", lot[C.MATURITY_DATE.value]))
+                & (
+                    pl.col(C.MATURITY_DATE.value)
+                    == lot.get("_maturity_date_key", lot[C.MATURITY_DATE.value])
+                )
             )
             if bond_coupons.height == 0:
                 continue
@@ -421,7 +458,8 @@ def calculate_operations_returns(
                 end_dt = current_date_dt
 
             period_coupons = bond_coupons.filter(
-                (pl.col(C.BUYBACK_DATE.value) >= buy_date) & (pl.col(C.BUYBACK_DATE.value) <= end_dt)
+                (pl.col(C.BUYBACK_DATE.value) >= buy_date)
+                & (pl.col(C.BUYBACK_DATE.value) <= end_dt)
             )
             if period_coupons.height > 0:
                 total_coupon_per_unit = period_coupons[C.UNIT_PRICE.value].sum()
@@ -437,7 +475,9 @@ def calculate_operations_returns(
 
         rec["end_value"] = endv
         initial = rec.get(C.OPERATION_VALUE.value, 0.0)
-        rec["simple_return"] = ((endv / initial) - 1) * 100 if initial >= 0.01 and endv > 0 else 0.0
+        rec["simple_return"] = (
+            ((endv / initial) - 1) * 100 if initial >= 0.01 and endv > 0 else 0.0
+        )
 
         holding = rec.get("holding_days", 0)
         if holding >= 30 and initial >= 0.01 and endv > 0:
@@ -524,7 +564,9 @@ def calculate_portfolio_monthly_returns(
                 price_lookup[bond_type][mat_key] = {}
             price_lookup[bond_type][mat_key][ref_key] = price
 
-    def _get_latest_price_fast(bond_type: str, maturity_date: date, ref_date: date) -> Optional[float]:
+    def _get_latest_price_fast(
+        bond_type: str, maturity_date: date, ref_date: date
+    ) -> Optional[float]:
         """Fast price lookup using nested dict structure."""
         if bond_type not in price_lookup:
             return None
@@ -554,11 +596,16 @@ def calculate_portfolio_monthly_returns(
 
     for month_start in months:
         month_end = _last_day_of_month(month_start)
-        month_end_dt = datetime(month_end.year, month_end.month, month_end.day, 23, 59, 59)
+        month_end_dt = datetime(
+            month_end.year, month_end.month, month_end.day, 23, 59, 59
+        )
 
         # Get operations in this month
         month_ops = operations.filter(
-            (pl.col(C.OPERATION_DATE.value) >= datetime(month_start.year, month_start.month, month_start.day))
+            (
+                pl.col(C.OPERATION_DATE.value)
+                >= datetime(month_start.year, month_start.month, month_start.day)
+            )
             & (pl.col(C.OPERATION_DATE.value) <= month_end_dt)
         )
 
@@ -590,7 +637,9 @@ def calculate_portfolio_monthly_returns(
                 old_qty = positions[key]["quantity"]
                 old_cost = positions[key]["avg_cost"]
                 new_qty = old_qty + qty
-                positions[key]["avg_cost"] = ((old_qty * old_cost) + value) / new_qty if new_qty > 0.0 else 0.0
+                positions[key]["avg_cost"] = (
+                    ((old_qty * old_cost) + value) / new_qty if new_qty > 0.0 else 0.0
+                )
                 positions[key]["quantity"] = new_qty
 
             elif op_type == OperationType.SELL.value:
@@ -606,7 +655,12 @@ def calculate_portfolio_monthly_returns(
             if coupon_lookup is None:
                 # Build lookup on demand
                 month_coupons = coupons.filter(
-                    (pl.col(C.BUYBACK_DATE.value) >= datetime(month_start.year, month_start.month, month_start.day))
+                    (
+                        pl.col(C.BUYBACK_DATE.value)
+                        >= datetime(
+                            month_start.year, month_start.month, month_start.day
+                        )
+                    )
                     & (pl.col(C.BUYBACK_DATE.value) <= month_end_dt)
                 )
                 for cpn in month_coupons.iter_rows(named=True):
@@ -620,16 +674,23 @@ def calculate_portfolio_monthly_returns(
                         coupon_income += positions[key]["quantity"] * unit_cpn
             else:
                 # Use pre-built coupon lookup
-                for (bond_type, maturity_date), position_qty in [(k[0], k[1]) for k in positions.keys()]:
+                for (bond_type, maturity_date), position_qty in [
+                    (k[0], k[1]) for k in positions.keys()
+                ]:
                     key = (bond_type, maturity_date)
                     if key in coupon_lookup:
                         for coupon_date, unit_price in coupon_lookup[key]:
                             if (
-                                datetime(month_start.year, month_start.month, month_start.day)
+                                datetime(
+                                    month_start.year, month_start.month, month_start.day
+                                )
                                 <= coupon_date
                                 <= month_end_dt
                             ):
-                                coupon_income += positions.get(key, {}).get("quantity", 0.0) * unit_price
+                                coupon_income += (
+                                    positions.get(key, {}).get("quantity", 0.0)
+                                    * unit_price
+                                )
 
         net_cash_flow -= coupon_income
 

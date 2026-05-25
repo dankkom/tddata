@@ -79,9 +79,7 @@ class TestGetDownloadInfo(unittest.TestCase):
             "tesouro_direto_fetcher.downloader.DataRepository.get_latest_stamped_file",
             return_value=mock_file,
         ):
-            info_list = asyncio.run(
-                get_download_info(self.dest_dir, self.dataset_id)
-            )
+            info_list = asyncio.run(get_download_info(self.dest_dir, self.dataset_id))
 
         self.assertFalse(info_list[0]["would_download"])
 

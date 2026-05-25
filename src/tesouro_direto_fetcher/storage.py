@@ -28,9 +28,7 @@ class DataRepository(StampedDataRepository):
         return self.dataset_path(dataset_id, filename)
 
     @staticmethod
-    def generate_filename(
-        name: str, last_modified: str | None = None
-    ) -> str:
+    def generate_filename(name: str, last_modified: str | None = None) -> str:
         """Return ``<slug>@<YYYYMMDDTHHMMSS>.csv`` for a CKAN resource.
 
         Returns ``<slug>.csv`` (no stamp) when ``last_modified`` is absent or

@@ -37,7 +37,11 @@ def _read_and_process_csv(
     def _process(df: pl.DataFrame) -> pl.DataFrame:
         df = df.rename(column_mapping)
         if C.BOND_TYPE.value in df.columns:
-            df = df.with_columns(pl.col(C.BOND_TYPE.value).map_elements(normalize_bond_type, return_dtype=pl.String))
+            df = df.with_columns(
+                pl.col(C.BOND_TYPE.value).map_elements(
+                    normalize_bond_type, return_dtype=pl.String
+                )
+            )
         if dtype_mapping:
             # Convert dtype string to Polars casting
             for col, dtype in dtype_mapping.items():
@@ -73,7 +77,9 @@ def _read_and_process_csv(
         return _batch_generator()
 
 
-def read_prices(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+def read_prices(
+    filepath: Path, chunksize: Optional[int] = None
+) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
     """Read bond prices and rates (Taxas e Preços dos Títulos)."""
     column_mapping = {
         "Data Base": C.REFERENCE_DATE.value,
@@ -103,8 +109,9 @@ def read_prices(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.Dat
     )
 
 
-
-def read_stock(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+def read_stock(
+    filepath: Path, chunksize: Optional[int] = None
+) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
     """Read bond stock (Estoque)."""
     column_mapping = {
         "Tipo Titulo": C.BOND_TYPE.value,
@@ -131,7 +138,9 @@ def read_stock(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.Data
     )
 
 
-def read_investors(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+def read_investors(
+    filepath: Path, chunksize: Optional[int] = None
+) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
     """Read investors data (Investidores)."""
     column_mapping = {
         "Codigo do Investidor": C.INVESTOR_ID.value,
@@ -166,7 +175,9 @@ def read_investors(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.
             [
                 pl.col(C.GENDER.value).replace(gender_map).cast(pl.Categorical),
                 pl.col(C.ACCOUNT_STATUS.value).replace(status_map).cast(pl.Categorical),
-                pl.col(C.TRADED_LAST_12_MONTHS.value).replace(traded_map).cast(pl.Categorical),
+                pl.col(C.TRADED_LAST_12_MONTHS.value)
+                .replace(traded_map)
+                .cast(pl.Categorical),
             ]
         )
         return df
@@ -180,7 +191,9 @@ def read_investors(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.
     )
 
 
-def read_operations(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+def read_operations(
+    filepath: Path, chunksize: Optional[int] = None
+) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
     """Read operations data (Operações)."""
     column_mapping = {
         "Codigo do Investidor": C.INVESTOR_ID.value,
@@ -220,7 +233,9 @@ def read_operations(filepath: Path, chunksize: Optional[int] = None) -> Union[pl
     )
 
 
-def read_sales(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+def read_sales(
+    filepath: Path, chunksize: Optional[int] = None
+) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
     """Read sales data (Vendas)."""
     column_mapping = {
         "Tipo Titulo": C.BOND_TYPE.value,
@@ -247,7 +262,9 @@ def read_sales(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.Data
     )
 
 
-def read_buybacks(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+def read_buybacks(
+    filepath: Path, chunksize: Optional[int] = None
+) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
     """Read buybacks data (Resgates)."""
     column_mapping = {
         "Tipo Titulo": C.BOND_TYPE.value,
@@ -273,7 +290,9 @@ def read_buybacks(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.D
     )
 
 
-def read_maturities(filepath: Path, chunksize: Optional[int] = None) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+def read_maturities(
+    filepath: Path, chunksize: Optional[int] = None
+) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
     """Read maturities data (Vencimentos)."""
     column_mapping = {
         "Tipo Titulo": C.BOND_TYPE.value,

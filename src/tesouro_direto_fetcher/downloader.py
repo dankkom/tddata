@@ -35,9 +35,7 @@ async def get_download_info(dest_dir: Path, dataset_id: str) -> list[dict]:
     try:
         resources = await get_dataset_resources(dataset_id)
     except Exception as e:
-        raise FetchError(
-            f"Error fetching resources for {dataset_id}: {e}"
-        ) from e
+        raise FetchError(f"Error fetching resources for {dataset_id}: {e}") from e
 
     info_list = []
     for resource in resources:
@@ -45,9 +43,7 @@ async def get_download_info(dest_dir: Path, dataset_id: str) -> list[dict]:
             continue
 
         url = resource["url"]
-        last_modified_str = (
-            resource.get("last_modified") or resource.get("created")
-        )
+        last_modified_str = resource.get("last_modified") or resource.get("created")
         filename = repo.generate_filename(resource["name"], last_modified_str)
         dest_filepath = repo.file_path(dataset_id, filename)
 
@@ -60,11 +56,7 @@ async def get_download_info(dest_dir: Path, dataset_id: str) -> list[dict]:
             file_size = 0
 
         would_download = True
-        if (
-            latest_file
-            and file_size
-            and latest_file.stat().st_size == file_size
-        ):
+        if latest_file and file_size and latest_file.stat().st_size == file_size:
             would_download = False
 
         info_list.append(
@@ -130,6 +122,7 @@ async def download(
             return []
 
         with batch_progress(dataset_id, total=len(remote)) as pbar:
+
             def _on_file_done(result: dict | None) -> None:
                 pbar.update(1)
 
