@@ -267,7 +267,7 @@ def main(argv: list[str] | None = None) -> None:
     configure_cli_logging(verbose=args.verbose)
 
     if not args.verbose:
-        logging.getLogger("quantilica").setLevel(logging.WARNING)
+        logging.getLogger("quantilica_core").setLevel(logging.WARNING)
         logging.getLogger("tesouro_direto_fetcher").setLevel(logging.WARNING)
 
     res = args.func(args)
