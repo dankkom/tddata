@@ -39,17 +39,12 @@ td = "tesouro_direto_fetcher.plugin:app"
 analysis = [
     "altair[save]>=6.0.0",
 ]
+
+[dependency-groups]
 dev = [
     "ruff>=0.9.0",
     "pytest>=8.0.0",
 ]
-
-[tool.ruff]
-line-length = 88
-target-version = "py312"
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
