@@ -270,7 +270,11 @@ def main(argv: list[str] | None = None) -> None:
         logging.getLogger("quantilica_core").setLevel(logging.WARNING)
         logging.getLogger("tesouro_direto_fetcher").setLevel(logging.WARNING)
 
-    res = args.func(args)
+    try:
+        res = args.func(args)
+    except KeyboardInterrupt:
+        print("\nOperação cancelada pelo usuário.", file=sys.stderr)
+        sys.exit(130)
     if isinstance(res, int) and res != 0:
         sys.exit(res)
 
