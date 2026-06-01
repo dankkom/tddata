@@ -1,11 +1,11 @@
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Optional
 
 from . import reader
 
 
 def convert_to_parquet(
-    csv_path: Path, parquet_path: Optional[Path] = None, dataset_type: str = "infer"
+    csv_path: Path, parquet_path: Path | None = None, dataset_type: str = "infer"
 ) -> Path:
     """Read a raw CSV file using the appropriate reader and save it as Parquet.
 

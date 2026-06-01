@@ -1,4 +1,3 @@
-from typing import Optional
 
 import altair as alt
 import polars as pl
@@ -490,8 +489,8 @@ def _plot_value_over_time(
     date_col: str,
     value_col: str,
     title: str,
-    hue_col: Optional[str] = None,
-    legend_title: Optional[str] = None,
+    hue_col: str | None = None,
+    legend_title: str | None = None,
     freq: str = "1mo",
 ) -> alt.Chart:
     """Helper function to plot values over time.

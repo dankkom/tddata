@@ -118,8 +118,7 @@ def cmd_sync(
             await downloader.download(output, dataset_id=dataset_id)
 
     try:
-        with console.status(f"[cyan]Sincronizando {dataset}...[/cyan]"):
-            asyncio.run(_run())
+        asyncio.run(_run())
     except KeyboardInterrupt:
         console.print("[yellow]Download cancelado.[/yellow]")
         raise typer.Exit(code=130) from None
@@ -194,8 +193,7 @@ def cmd_pipeline(
             await downloader.download(output, dataset_id=dataset_id)
 
     try:
-        with console.status(f"[cyan]Sincronizando {dataset}...[/cyan]"):
-            asyncio.run(_run())
+        asyncio.run(_run())
     except KeyboardInterrupt:
         console.print("[yellow]Download cancelado.[/yellow]")
         raise typer.Exit(code=130) from None

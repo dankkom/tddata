@@ -1,5 +1,4 @@
 from datetime import date, datetime, timedelta
-from typing import Optional
 
 import polars as pl
 
@@ -263,8 +262,8 @@ def _last_day_of_month(d: date) -> date:
 def calculate_operations_returns(
     operations: pl.DataFrame,
     prices: pl.DataFrame,
-    current_date: Optional[date] = None,
-    coupons: Optional[pl.DataFrame] = None,
+    current_date: date | None = None,
+    coupons: pl.DataFrame | None = None,
 ) -> pl.DataFrame:
     """Calculate returns for each buy operation with FIFO matching for sells.
 
@@ -505,11 +504,11 @@ def calculate_operations_returns(
 def calculate_portfolio_monthly_returns(
     operations: pl.DataFrame,
     prices: pl.DataFrame,
-    start_date: Optional[date] = None,
-    end_date: Optional[date] = None,
-    coupons: Optional[pl.DataFrame] = None,
-    price_lookup: Optional[dict] = None,
-    coupon_lookup: Optional[dict] = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
+    coupons: pl.DataFrame | None = None,
+    price_lookup: dict | None = None,
+    coupon_lookup: dict | None = None,
 ) -> pl.DataFrame:
     """Calculate monthly portfolio returns using Modified Dietz method.
 
@@ -566,7 +565,7 @@ def calculate_portfolio_monthly_returns(
 
     def _get_latest_price_fast(
         bond_type: str, maturity_date: date, ref_date: date
-    ) -> Optional[float]:
+    ) -> float | None:
         """Fast price lookup using nested dict structure."""
         if bond_type not in price_lookup:
             return None

@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import logging
 from pathlib import Path
+import sys
 
 from quantilica_core.logging import configure_cli_logging
 
@@ -177,7 +178,7 @@ def cmd_pipeline(args) -> int:
     return cmd_convert(args)
 
 
-def set_parser():
+def get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="tesouro-direto-fetcher",
         description="Tesouro Direto Data Downloader & Converter",
@@ -260,15 +261,18 @@ def set_parser():
     return parser
 
 
-def main():
-    parser = set_parser()
-    args = parser.parse_args()
+def main(argv: list[str] | None = None) -> None:
+    parser = get_parser()
+    args = parser.parse_args(argv)
     configure_cli_logging(verbose=args.verbose)
 
     if not args.verbose:
+        logging.getLogger("quantilica").setLevel(logging.WARNING)
         logging.getLogger("tesouro_direto_fetcher").setLevel(logging.WARNING)
 
-    return args.func(args)
+    res = args.func(args)
+    if isinstance(res, int) and res != 0:
+        sys.exit(res)
 
 
 if __name__ == "__main__":

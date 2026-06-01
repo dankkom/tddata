@@ -9,8 +9,8 @@ The DataFrames returned by these functions use standardized column names
 defined in the `Column` enum.
 """
 
+from collections.abc import Callable, Iterator
 from pathlib import Path
-from typing import Callable, Dict, Iterator, List, Optional, Union
 
 import polars as pl
 
@@ -26,12 +26,12 @@ from .constants import Column as C
 
 def _read_and_process_csv(
     filepath: Path,
-    column_mapping: Dict[str, str],
-    date_columns: Optional[List[str]] = None,
-    dtype_mapping: Optional[Dict[str, str]] = None,
-    post_process_func: Optional[Callable[[pl.DataFrame], pl.DataFrame]] = None,
-    chunksize: Optional[int] = None,
-) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+    column_mapping: dict[str, str],
+    date_columns: list[str] | None = None,
+    dtype_mapping: dict[str, str] | None = None,
+    post_process_func: Callable[[pl.DataFrame], pl.DataFrame] | None = None,
+    chunksize: int | None = None,
+) -> pl.DataFrame | Iterator[pl.DataFrame]:
     """Generic function to read and process a CSV file."""
 
     def _process(df: pl.DataFrame) -> pl.DataFrame:
@@ -78,8 +78,8 @@ def _read_and_process_csv(
 
 
 def read_prices(
-    filepath: Path, chunksize: Optional[int] = None
-) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+    filepath: Path, chunksize: int | None = None
+) -> pl.DataFrame | Iterator[pl.DataFrame]:
     """Read bond prices and rates (Taxas e Preços dos Títulos)."""
     column_mapping = {
         "Data Base": C.REFERENCE_DATE.value,
@@ -110,8 +110,8 @@ def read_prices(
 
 
 def read_stock(
-    filepath: Path, chunksize: Optional[int] = None
-) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+    filepath: Path, chunksize: int | None = None
+) -> pl.DataFrame | Iterator[pl.DataFrame]:
     """Read bond stock (Estoque)."""
     column_mapping = {
         "Tipo Titulo": C.BOND_TYPE.value,
@@ -139,8 +139,8 @@ def read_stock(
 
 
 def read_investors(
-    filepath: Path, chunksize: Optional[int] = None
-) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+    filepath: Path, chunksize: int | None = None
+) -> pl.DataFrame | Iterator[pl.DataFrame]:
     """Read investors data (Investidores)."""
     column_mapping = {
         "Codigo do Investidor": C.INVESTOR_ID.value,
@@ -192,8 +192,8 @@ def read_investors(
 
 
 def read_operations(
-    filepath: Path, chunksize: Optional[int] = None
-) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+    filepath: Path, chunksize: int | None = None
+) -> pl.DataFrame | Iterator[pl.DataFrame]:
     """Read operations data (Operações)."""
     column_mapping = {
         "Codigo do Investidor": C.INVESTOR_ID.value,
@@ -234,8 +234,8 @@ def read_operations(
 
 
 def read_sales(
-    filepath: Path, chunksize: Optional[int] = None
-) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+    filepath: Path, chunksize: int | None = None
+) -> pl.DataFrame | Iterator[pl.DataFrame]:
     """Read sales data (Vendas)."""
     column_mapping = {
         "Tipo Titulo": C.BOND_TYPE.value,
@@ -263,8 +263,8 @@ def read_sales(
 
 
 def read_buybacks(
-    filepath: Path, chunksize: Optional[int] = None
-) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+    filepath: Path, chunksize: int | None = None
+) -> pl.DataFrame | Iterator[pl.DataFrame]:
     """Read buybacks data (Resgates)."""
     column_mapping = {
         "Tipo Titulo": C.BOND_TYPE.value,
@@ -291,8 +291,8 @@ def read_buybacks(
 
 
 def read_maturities(
-    filepath: Path, chunksize: Optional[int] = None
-) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+    filepath: Path, chunksize: int | None = None
+) -> pl.DataFrame | Iterator[pl.DataFrame]:
     """Read maturities data (Vencimentos)."""
     column_mapping = {
         "Tipo Titulo": C.BOND_TYPE.value,
@@ -320,8 +320,8 @@ def read_maturities(
 
 
 def read_interest_coupons(
-    filepath: Path, chunksize: Optional[int] = None
-) -> Union[pl.DataFrame, Iterator[pl.DataFrame]]:
+    filepath: Path, chunksize: int | None = None
+) -> pl.DataFrame | Iterator[pl.DataFrame]:
     """Read interest coupons data (Pagamento de Cupom de Juros).
 
     Parses the history of interest coupon payments.

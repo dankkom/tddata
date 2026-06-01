@@ -9,6 +9,14 @@ from quantilica_core.http import BROWSER_HEADERS, AsyncHttpClient
 from quantilica_core.logging import log_step
 from quantilica_core.progress import batch_progress
 
+try:
+    from quantilica_core.cli import get_console, make_batch_progress
+    from rich.live import Live
+
+    _RICH_AVAILABLE = True
+except (ModuleNotFoundError, ImportError):
+    _RICH_AVAILABLE = False
+
 from . import logger
 from .constants import CKAN_API_URL
 from .storage import DataRepository
@@ -121,9 +129,33 @@ async def download(
         if not remote:
             return []
 
-        with batch_progress(dataset_id, total=len(remote)) as pbar:
+        if _RICH_AVAILABLE:
+            console = get_console()
+            overall = make_batch_progress(console)
+            overall_task = overall.add_task(
+                f"[cyan]{dataset_id}[/cyan]", total=len(remote)
+            )
 
             def _on_file_done(result: dict | None) -> None:
+                overall.update(overall_task, advance=1)
+
+            with Live(overall, console=console, refresh_per_second=10):
+                return await download_resources(
+                    remote,
+                    repo,
+                    dataset_id,
+                    client,
+                    source_id=SOURCE_ID,
+                    producer="tesouro-direto-fetcher",
+                    max_concurrency=max_concurrency,
+                    logger=logger,
+                    show_progress=False,
+                    on_file_done=_on_file_done,
+                )
+
+        with batch_progress(dataset_id, total=len(remote)) as pbar:
+
+            def _on_file_done_tqdm(result: dict | None) -> None:
                 pbar.update(1)
 
             return await download_resources(
@@ -135,7 +167,7 @@ async def download(
                 producer="tesouro-direto-fetcher",
                 max_concurrency=max_concurrency,
                 logger=logger,
-                on_file_done=_on_file_done,
+                on_file_done=_on_file_done_tqdm,
             )
 
     with log_step(logger, "download-dataset", dataset_id=dataset_id):
