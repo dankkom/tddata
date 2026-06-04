@@ -9,7 +9,7 @@ coexist.
 import datetime as dt
 from pathlib import Path
 
-from quantilica_core.storage import StampedDataRepository, slugify, stamp_filename
+from quantilica.core.storage import StampedDataRepository, slugify, stamp_filename
 
 
 class DataRepository(StampedDataRepository):

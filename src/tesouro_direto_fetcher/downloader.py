@@ -2,15 +2,15 @@
 
 from pathlib import Path
 
-import quantilica_core.metadata as core_meta
-from quantilica_core.exceptions import FetchError
-from quantilica_core.fetcher import RemoteResource, download_resources
-from quantilica_core.http import BROWSER_HEADERS, AsyncHttpClient
-from quantilica_core.logging import log_step
-from quantilica_core.progress import batch_progress
+import quantilica.core.metadata as core_meta
+from quantilica.core.exceptions import FetchError
+from quantilica.core.fetcher import RemoteResource, download_resources
+from quantilica.core.http import BROWSER_HEADERS, AsyncHttpClient
+from quantilica.core.logging import log_step
+from quantilica.core.progress import batch_progress
 
 try:
-    from quantilica_core.cli import get_console, make_batch_progress
+    from quantilica.core.cli import get_console, make_batch_progress
     from rich.live import Live
 
     _RICH_AVAILABLE = True

@@ -2,12 +2,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
-from quantilica_core.exceptions import FetchError
-
+from quantilica.core.exceptions import FetchError
 from tesouro_direto_fetcher import downloader
 from tesouro_direto_fetcher.downloader import _to_remote_resources
 from tesouro_direto_fetcher.storage import DataRepository
-
 
 CKAN_RESOURCES = [
     {
