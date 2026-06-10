@@ -1,4 +1,5 @@
 import enum
+from datetime import date
 
 
 # Columns' names are defined in the constants.py file, which is imported by the
@@ -182,8 +183,9 @@ DATASET_SALES = "vendas-do-tesouro-direto"
 # Bond type name normalization mapping
 # Maps various bond type names found in datasets to standardized names
 BOND_TYPE_NORMALIZATION = {
-    # Legacy code
-    "NTN-B1": "Tesouro RendA+",
+    # NOTE: the "NTN-B1" instrument code is intentionally absent: it is shared
+    # by Tesouro RendA+ and Tesouro EducA+ and can only be disambiguated by
+    # maturity date (see resolve_bond_type).
     # Case variations
     "Tesouro Renda+ Aposentadoria Extra": "Tesouro RendA+",
     "Tesouro Educa+": "Tesouro EducA+",
@@ -197,6 +199,30 @@ BOND_TYPE_NORMALIZATION = {
     "Tesouro RendA+": "Tesouro RendA+",
     "Tesouro EducA+": "Tesouro EducA+",
 }
+
+
+# "NTN-B1" is the instrument code shared by Tesouro RendA+ and Tesouro EducA+
+# in the operations/stock datasets, so it cannot be mapped by name alone.
+# RendA+ final maturities are always Dec 15 of 2049 + 5k (conversion years
+# 2030, 2035, ... plus ~20 years of monthly payments); every other NTN-B1
+# maturity belongs to an EducA+ vintage (yearly conversions, 5 years of
+# payments). Caveat: an EducA+ vintage whose final maturity lands exactly on
+# a RendA+ year (the first is EducA+ 2045 -> 2049-12-15) cannot be told apart
+# in these datasets and resolves as RendA+.
+NTNB1_CODE = "NTN-B1"
+RENDA_FIRST_MATURITY_YEAR = 2049
+RENDA_MATURITY_YEAR_STEP = 5
+
+
+def is_renda_maturity(maturity_date: date) -> bool:
+    """Whether a final maturity date matches the RendA+ pattern (see NTNB1_CODE)."""
+    return (
+        maturity_date.month == 12
+        and maturity_date.day == 15
+        and maturity_date.year >= RENDA_FIRST_MATURITY_YEAR
+        and (maturity_date.year - RENDA_FIRST_MATURITY_YEAR) % RENDA_MATURITY_YEAR_STEP
+        == 0
+    )
 
 
 def normalize_bond_type(bond_type_name: str) -> str | None:
@@ -223,3 +249,25 @@ def normalize_bond_type(bond_type_name: str) -> str | None:
 
     # Return original if no mapping found (with warning potential)
     return bond_type_name
+
+
+def resolve_bond_type(bond_type_name: str, maturity_date: date | None) -> str | None:
+    """
+    Normalize a bond type name, disambiguating NTN-B1 by maturity date.
+
+    Args:
+        bond_type_name: The bond type name from the dataset
+        maturity_date: The bond's final maturity date, required for NTN-B1
+
+    Returns:
+        Standardized bond type name, or None for NTN-B1 without a maturity
+    """
+    if not bond_type_name:
+        return None
+    if bond_type_name.strip().upper() == NTNB1_CODE:
+        if maturity_date is None:
+            return None
+        if is_renda_maturity(maturity_date):
+            return "Tesouro RendA+"
+        return "Tesouro EducA+"
+    return normalize_bond_type(bond_type_name)

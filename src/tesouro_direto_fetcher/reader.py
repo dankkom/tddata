@@ -15,6 +15,9 @@ from pathlib import Path
 import polars as pl
 
 from .constants import (
+    NTNB1_CODE,
+    RENDA_FIRST_MATURITY_YEAR,
+    RENDA_MATURITY_YEAR_STEP,
     AccountStatus,
     Channel,
     Gender,
@@ -22,6 +25,43 @@ from .constants import (
     normalize_bond_type,
 )
 from .constants import Column as C
+
+
+def _disambiguate_ntnb1(df: pl.DataFrame) -> pl.DataFrame:
+    """Resolve the NTN-B1 code (RendA+ vs EducA+) by maturity date.
+
+    Both Tesouro RendA+ and Tesouro EducA+ appear as "NTN-B1" in some
+    datasets; only the final maturity date tells them apart (RendA+ matures
+    on Dec 15 of 2049 + 5k). See resolve_bond_type in constants.py.
+    """
+    if C.MATURITY_DATE.value not in df.columns:
+        return df
+
+    maturity = pl.col(C.MATURITY_DATE.value)
+    if df.schema[C.MATURITY_DATE.value] == pl.String:
+        maturity = maturity.str.to_date("%d/%m/%Y", strict=False)
+
+    year = maturity.dt.year()
+    is_renda = (
+        (maturity.dt.month() == 12)
+        & (maturity.dt.day() == 15)
+        & (year >= RENDA_FIRST_MATURITY_YEAR)
+        & ((year - RENDA_FIRST_MATURITY_YEAR) % RENDA_MATURITY_YEAR_STEP == 0)
+    )
+
+    return df.with_columns(
+        pl.when(
+            pl.col(C.BOND_TYPE.value).str.strip_chars().str.to_uppercase()
+            == NTNB1_CODE
+        )
+        .then(
+            pl.when(is_renda.fill_null(False))
+            .then(pl.lit("Tesouro RendA+"))
+            .otherwise(pl.lit("Tesouro EducA+"))
+        )
+        .otherwise(pl.col(C.BOND_TYPE.value))
+        .alias(C.BOND_TYPE.value)
+    )
 
 
 def _read_and_process_csv(
@@ -42,6 +82,7 @@ def _read_and_process_csv(
                     normalize_bond_type, return_dtype=pl.String
                 )
             )
+            df = _disambiguate_ntnb1(df)
         if dtype_mapping:
             # Convert dtype string to Polars casting
             for col, dtype in dtype_mapping.items():
