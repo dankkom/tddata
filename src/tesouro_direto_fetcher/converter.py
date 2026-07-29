@@ -63,7 +63,7 @@ def _get_reader_function(filepath: Path, dataset_type: str) -> Callable:
         return reader.read_operations
     elif "vendas" in name:
         return reader.read_sales
-    elif "resgates" in name:
+    elif "resgates" in name or "recompras" in name:
         return reader.read_buybacks
     elif "vencimentos" in name:
         return reader.read_maturities

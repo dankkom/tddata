@@ -5,6 +5,14 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [3.0.1] - 2026-07-29
+
+### Corrigido
+
+- Correção de inferência do dataset de recompras, mapeando a palavra-chave "recompras" no nome do arquivo para o leitor `read_buybacks`.
+- Implementação de tratamento de fallback dinâmico para o diretório padrão de saída se `/data` não for gravável.
+- Resiliência na renomeação de colunas do Polars no método `_process` do leitor e mapeamento da nova coluna de data de liquidação de venda (`"Data de Liquidacao da Venda"`).
+
 ## [3.0.0] - 2026-05-19
 
 Primeira entrada em formato Keep a Changelog; documenta o estado do pacote nesta

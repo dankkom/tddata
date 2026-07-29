@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from pathlib import Path
 from typing import Annotated
 
@@ -26,7 +27,21 @@ from tesouro_direto_fetcher.constants import (
 
 app = typer.Typer(help="Dados do Tesouro Direto (preços, taxas, operações).")
 
-_DEFAULT_OUTPUT = Path("/data/tesouro-direto")
+
+def _get_default_output() -> Path:
+    env_dir = os.environ.get("DATA_DIR")
+    if env_dir:
+        return Path(env_dir) / "tesouro-direto"
+    try:
+        data_dir = Path("/data")
+        if data_dir.exists() and os.access(data_dir, os.W_OK):
+            return data_dir / "tesouro-direto"
+    except Exception:
+        pass
+    return Path.home() / "data" / "tesouro-direto"
+
+
+_DEFAULT_OUTPUT = _get_default_output()
 console = get_console()
 
 _DATASET_MAP = {

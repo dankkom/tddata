@@ -51,8 +51,7 @@ def _disambiguate_ntnb1(df: pl.DataFrame) -> pl.DataFrame:
 
     return df.with_columns(
         pl.when(
-            pl.col(C.BOND_TYPE.value).str.strip_chars().str.to_uppercase()
-            == NTNB1_CODE
+            pl.col(C.BOND_TYPE.value).str.strip_chars().str.to_uppercase() == NTNB1_CODE
         )
         .then(
             pl.when(is_renda.fill_null(False))
@@ -75,7 +74,8 @@ def _read_and_process_csv(
     """Generic function to read and process a CSV file."""
 
     def _process(df: pl.DataFrame) -> pl.DataFrame:
-        df = df.rename(column_mapping)
+        existing_mapping = {k: v for k, v in column_mapping.items() if k in df.columns}
+        df = df.rename(existing_mapping)
         if C.BOND_TYPE.value in df.columns:
             df = df.with_columns(
                 pl.col(C.BOND_TYPE.value).map_elements(
@@ -282,6 +282,7 @@ def read_sales(
         "Tipo Titulo": C.BOND_TYPE.value,
         "Vencimento do Titulo": C.MATURITY_DATE.value,
         "Data Venda": C.SALE_DATE.value,
+        "Data de Liquidacao da Venda": C.SALE_DATE.value,
         "PU": C.UNIT_PRICE.value,
         "Quantidade": C.QUANTITY.value,
         "Valor": C.VALUE.value,
