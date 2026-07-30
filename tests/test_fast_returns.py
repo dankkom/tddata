@@ -5,7 +5,13 @@ in a synthetic dataset covering partial sells, coupons, price gaps, missing
 prices and deposit/withdrawal operations, the bulk results must match.
 """
 
+import unittest
 from datetime import date
+
+from tesouro_direto_fetcher import _HAS_ANALYSIS
+
+if not _HAS_ANALYSIS:
+    raise unittest.SkipTest("Analysis extras required.")
 
 import polars as pl
 import pytest
@@ -221,9 +227,9 @@ def test_summary_matches_legacy_aggregates(operations, prices, coupons):
         assert row["total_end_value"] == pytest.approx(
             float(legacy["end_value"].sum()), rel=1e-9
         )
-        assert row["num_operations"] == operations.filter(
-            pl.col(INV) == investor
-        ).height
+        assert (
+            row["num_operations"] == operations.filter(pl.col(INV) == investor).height
+        )
 
     assert by_bond.filter(pl.col(INV) == 2).height == 2
 

@@ -3,6 +3,9 @@ from pathlib import Path
 
 from . import reader
 
+if reader is None:
+    raise ImportError("Analysis extras (polars, etc.) are required.")
+
 
 def convert_to_parquet(
     csv_path: Path, parquet_path: Path | None = None, dataset_type: str = "infer"

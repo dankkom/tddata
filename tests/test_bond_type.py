@@ -1,6 +1,12 @@
 """Tests for bond type normalization and NTN-B1 disambiguation."""
 
+import unittest
 from datetime import date
+
+from tesouro_direto_fetcher import _HAS_ANALYSIS
+
+if not _HAS_ANALYSIS:
+    raise unittest.SkipTest("Analysis extras required.")
 
 from tesouro_direto_fetcher.constants import Column as C
 from tesouro_direto_fetcher.constants import (

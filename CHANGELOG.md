@@ -5,6 +5,13 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [3.0.2] - 2026-07-29
+
+### Corrigido
+
+- Correção de importação do conversor na ausência de extras de análise, lançando ImportError em vez de AttributeError.
+- Adicionadas verificações SkipTest no unittest em testes que dependem de polars para evitar quebras em ambientes de CI onde extras de análise não estão instalados.
+
 ## [3.0.1] - 2026-07-29
 
 ### Corrigido
