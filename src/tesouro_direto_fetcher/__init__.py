@@ -31,6 +31,7 @@ except ImportError:
     reader = None  # type: ignore
 
 __all__ = [
+    "__version__",
     "downloader",
     "Column",
     "BondType",
