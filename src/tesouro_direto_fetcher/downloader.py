@@ -153,6 +153,7 @@ async def download(
         sem = asyncio.Semaphore(workers)
 
         with make_download_progress(console=console) as progress:
+
             async def _download_file(res: RemoteResource) -> dict | None:
                 dest = repo.dataset_path(dataset_id, res.filename)
 
@@ -200,7 +201,7 @@ async def download(
                             pass
                     return None
                 finally:
-                    progress.update(task_id, visible=False)
+                    pass
 
             tasks = [_download_file(r) for r in remote]
             results = await asyncio.gather(*tasks)
