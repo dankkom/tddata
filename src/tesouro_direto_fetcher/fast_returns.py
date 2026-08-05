@@ -42,13 +42,17 @@ _SELL = OperationType.SELL.value
 
 def _normalize_ops(operations: pl.DataFrame) -> pl.DataFrame:
     """Cast key columns to join-friendly dtypes and add helper columns."""
-    return operations.with_row_index("_row").with_columns(
-        pl.col(_BT).cast(pl.Utf8),
-        pl.col(_MAT).cast(pl.Date).alias("_mat"),
-        pl.col(_OP_DATE).cast(pl.Date).alias("_op_date"),
-        pl.col(_QTY).cast(pl.Float64).fill_null(0.0).alias("_qty"),
-        pl.col(_OP_VALUE).cast(pl.Float64).fill_null(0.0).alias("_value"),
-    ).with_columns(pl.col("_op_date").dt.truncate("1mo").alias("_month"))
+    return (
+        operations.with_row_index("_row")
+        .with_columns(
+            pl.col(_BT).cast(pl.Utf8),
+            pl.col(_MAT).cast(pl.Date).alias("_mat"),
+            pl.col(_OP_DATE).cast(pl.Date).alias("_op_date"),
+            pl.col(_QTY).cast(pl.Float64).fill_null(0.0).alias("_qty"),
+            pl.col(_OP_VALUE).cast(pl.Float64).fill_null(0.0).alias("_value"),
+        )
+        .with_columns(pl.col("_op_date").dt.truncate("1mo").alias("_month"))
+    )
 
 
 def _normalize_prices(prices: pl.DataFrame) -> pl.DataFrame:
@@ -110,9 +114,9 @@ def _monthly_price_grid(
         month_close.group_by([_BT, "_mat"])
         .agg(pl.col("_month").min().alias("_first"))
         .with_columns(
-            pl.date_ranges(
-                pl.col("_first"), pl.lit(end_month), interval="1mo"
-            ).alias("_month")
+            pl.date_ranges(pl.col("_first"), pl.lit(end_month), interval="1mo").alias(
+                "_month"
+            )
         )
         .explode("_month")
         .drop("_first")
@@ -214,9 +218,9 @@ def calculate_monthly_returns_bulk(
         .unique()
         .join(ranges, on=gkeys)
         .with_columns(
-            pl.date_ranges(
-                pl.col("_g_start"), pl.col("_g_end"), interval="1mo"
-            ).alias("_month")
+            pl.date_ranges(pl.col("_g_start"), pl.col("_g_end"), interval="1mo").alias(
+                "_month"
+            )
         )
         .explode("_month")
         .drop(["_g_start", "_g_end"])
@@ -283,23 +287,19 @@ def calculate_monthly_returns_bulk(
 
     result = (
         ranges.with_columns(
-            pl.date_ranges(
-                pl.col("_g_start"), pl.col("_g_end"), interval="1mo"
-            ).alias("_month")
+            pl.date_ranges(pl.col("_g_start"), pl.col("_g_end"), interval="1mo").alias(
+                "_month"
+            )
         )
         .explode("_month")
         .drop(["_g_start", "_g_end"])
         .join(agg, on=gkeys + ["_month"], how="left")
         .join(flows, on=gkeys + ["_month"], how="left")
-        .with_columns(
-            pl.col("_bmv", "_emv", "_coupon", "_net_cf_ops").fill_null(0.0)
-        )
+        .with_columns(pl.col("_bmv", "_emv", "_coupon", "_net_cf_ops").fill_null(0.0))
         .with_columns(
             (pl.col("_net_cf_ops") - pl.col("_coupon")).alias("net_cash_flow")
         )
-        .with_columns(
-            (pl.col("_bmv") + pl.col("net_cash_flow") / 2.0).alias("_denom")
-        )
+        .with_columns((pl.col("_bmv") + pl.col("net_cash_flow") / 2.0).alias("_denom"))
         .with_columns(
             pl.when(pl.col("_denom") > 0.01)
             .then(
@@ -553,7 +553,7 @@ def calculate_lots_bulk(
                 right_on="_cpn_date",
                 by=[_BT, "_mat"],
                 strategy="backward",
-            check_sortedness=False,
+                check_sortedness=False,
             )
             .sort([_BT, "_mat", "_cpn_before"])
             .join_asof(
@@ -562,7 +562,7 @@ def calculate_lots_bulk(
                 right_on="_cpn_date",
                 by=[_BT, "_mat"],
                 strategy="backward",
-            check_sortedness=False,
+                check_sortedness=False,
             )
             .with_columns(
                 (
@@ -581,12 +581,9 @@ def calculate_lots_bulk(
         lots = lots.with_columns(pl.lit(0.0).alias("total_coupons"))
 
     # --- Per-lot return metrics (same formulas and clamps as the legacy code)
-    end_value = (
-        pl.when(pl.col("status") == "closed")
-        .then(pl.col("sell_value"))
-        .otherwise(pl.col("current_value").fill_null(0.0))
-        + pl.col("total_coupons")
-    )
+    end_value = pl.when(pl.col("status") == "closed").then(
+        pl.col("sell_value")
+    ).otherwise(pl.col("current_value").fill_null(0.0)) + pl.col("total_coupons")
     lots = lots.with_columns(end_value.alias("end_value"))
 
     valid = (pl.col("_lot_value") >= 0.01) & (pl.col("end_value") > 0)

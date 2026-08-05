@@ -112,52 +112,27 @@ def _to_remote_resources(
 async def download(
     dest_dir: Path,
     dataset_id: str,
-    max_concurrency: int = 3,
+    workers: int = 4,
     show_progress: bool = True,
 ) -> list[dict]:
     """Download data files concurrently."""
     repo = DataRepository(dest_dir)
 
-    if show_progress:
-        try:
-            resources = await get_dataset_resources(dataset_id)
-        except Exception as e:
-            logger.error(f"Error fetching resources for {dataset_id}: {e}")
-            return []
+    try:
+        resources = await get_dataset_resources(dataset_id)
+    except Exception as e:
+        logger.error(f"Error fetching resources for {dataset_id}: {e}")
+        return []
 
-        remote = _to_remote_resources(resources, repo)
-        if not remote:
-            return []
+    remote = _to_remote_resources(resources, repo)
+    if not remote:
+        if not show_progress:
+            logger.info("No CSV resources found.")
+        return []
 
-        if _RICH_AVAILABLE:
-            console = get_console()
-            overall = make_batch_progress(console)
-            overall_task = overall.add_task(
-                f"[cyan]{dataset_id}[/cyan]", total=len(remote)
-            )
-
-            def _on_file_done(result: dict | None) -> None:
-                overall.update(overall_task, advance=1)
-
-            with Live(overall, console=console, refresh_per_second=10):
-                return await download_resources(
-                    remote,
-                    repo,
-                    dataset_id,
-                    client,
-                    source_id=SOURCE_ID,
-                    producer="tesouro-direto-fetcher",
-                    max_concurrency=max_concurrency,
-                    logger=logger,
-                    show_progress=False,
-                    on_file_done=_on_file_done,
-                )
-
-        with batch_progress(dataset_id, total=len(remote)) as pbar:
-
-            def _on_file_done_tqdm(result: dict | None) -> None:
-                pbar.update(1)
-
+    if not show_progress:
+        with log_step(logger, "download-dataset", dataset_id=dataset_id):
+            logger.info(f"Found {len(remote)} files. Starting download...")
             return await download_resources(
                 remote,
                 repo,
@@ -165,25 +140,79 @@ async def download(
                 client,
                 source_id=SOURCE_ID,
                 producer="tesouro-direto-fetcher",
-                max_concurrency=max_concurrency,
+                max_concurrency=workers,
                 logger=logger,
-                on_file_done=_on_file_done_tqdm,
             )
 
-    with log_step(logger, "download-dataset", dataset_id=dataset_id):
-        logger.info(f"Fetching metadata for {dataset_id}...")
-        try:
-            resources = await get_dataset_resources(dataset_id)
-        except Exception as e:
-            logger.error(f"Error fetching resources for {dataset_id}: {e}")
-            return []
+    if _RICH_AVAILABLE:
+        import asyncio
 
-        remote = _to_remote_resources(resources, repo)
-        if not remote:
-            logger.info("No CSV resources found.")
-            return []
+        from quantilica.core.cli import make_download_progress
 
-        logger.info(f"Found {len(remote)} files. Starting download...")
+        console = get_console()
+        progress = make_download_progress(console)
+        sem = asyncio.Semaphore(workers)
+
+        async def _download_file(res: RemoteResource) -> dict | None:
+            dest = repo.dataset_path(dataset_id, res.filename)
+
+            if res.size > 0:
+                slug = res.filename.partition("@")[0]
+                latest = repo.get_latest_stamped_file(dataset_id, slug, "csv")
+                if latest is not None and latest.stat().st_size == res.size:
+                    logger.debug(f"Skipping {res.filename}: matching local copy")
+                    return None
+
+            task_id = progress.add_task(f"[cyan]{res.name}", total=res.size or None)
+
+            last_seen = 0
+
+            def _on_progress(downloaded: int, total: int) -> None:
+                nonlocal last_seen
+                kwargs = {"advance": downloaded - last_seen}
+                if total:
+                    kwargs["total"] = total
+                progress.update(task_id, **kwargs)
+                last_seen = downloaded
+
+            try:
+                async with sem:
+                    await client.download_with_manifest(
+                        res.url,
+                        dest,
+                        source_id=SOURCE_ID,
+                        dataset_id=dataset_id,
+                        producer="tesouro-direto-fetcher",
+                        progress=_on_progress,
+                    )
+                return {
+                    "url": res.url,
+                    "filename": res.filename,
+                    "destination": dest,
+                    "file_size": dest.stat().st_size,
+                }
+            except Exception as exc:
+                logger.error(f"Failed to download {res.url}: {exc}")
+                if dest.exists():
+                    try:
+                        dest.unlink()
+                    except OSError:
+                        pass
+                return None
+            finally:
+                progress.update(task_id, visible=False)
+
+        with Live(progress, console=console, refresh_per_second=10):
+            tasks = [_download_file(r) for r in remote]
+            results = await asyncio.gather(*tasks)
+            return [r for r in results if r is not None]
+
+    # Fallback to tqdm if rich is not available
+    with batch_progress(dataset_id, total=len(remote)) as pbar:
+
+        def _on_file_done_tqdm(result: dict | None) -> None:
+            pbar.update(1)
+
         return await download_resources(
             remote,
             repo,
@@ -191,8 +220,9 @@ async def download(
             client,
             source_id=SOURCE_ID,
             producer="tesouro-direto-fetcher",
-            max_concurrency=max_concurrency,
+            max_concurrency=workers,
             logger=logger,
+            on_file_done=_on_file_done_tqdm,
         )
 
 

@@ -129,7 +129,9 @@ def run_investors(data_dir: Path):
         if demo in [C.PROFESSION.value, C.MARITAL_STATUS.value]:
             kind = "barh"
 
-        chart = plot.plot_investors_demographics(full_data, column=demo, chart_type=kind)
+        chart = plot.plot_investors_demographics(
+            full_data, column=demo, chart_type=kind
+        )
         save_plot(chart, f"investors_demographics_{demo}.png")
 
     print("  Plotting new investors evolution (all history)...")

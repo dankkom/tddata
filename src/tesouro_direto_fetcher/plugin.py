@@ -78,6 +78,9 @@ def cmd_sync(
             help=f"Dataset ({', '.join(_DATASET_CHOICES)})",
         ),
     ] = "all",
+    workers: Annotated[
+        int, typer.Option("--workers", help="Downloads concorrentes")
+    ] = 4,
     dry_run: Annotated[
         bool, typer.Option("--dry-run", help="Listar sem baixar")
     ] = False,
@@ -116,7 +119,7 @@ def cmd_sync(
 
     async def _run() -> None:
         for dataset_id in _resolve_ids(dataset):
-            await downloader.download(output, dataset_id=dataset_id)
+            await downloader.download(output, dataset_id=dataset_id, workers=workers)
 
     try:
         asyncio.run(_run())
@@ -176,6 +179,9 @@ def cmd_pipeline(
             help=f"Dataset ({', '.join(_DATASET_CHOICES)})",
         ),
     ] = "all",
+    workers: Annotated[
+        int, typer.Option("--workers", help="Downloads concorrentes")
+    ] = 4,
     verbose: Annotated[bool, typer.Option("--verbose", help="Logs detalhados")] = False,
 ) -> None:
     """Pipeline completo do Tesouro Direto (sync → convert)."""
@@ -191,7 +197,7 @@ def cmd_pipeline(
 
     async def _run() -> None:
         for dataset_id in _resolve_ids(dataset):
-            await downloader.download(output, dataset_id=dataset_id)
+            await downloader.download(output, dataset_id=dataset_id, workers=workers)
 
     try:
         asyncio.run(_run())

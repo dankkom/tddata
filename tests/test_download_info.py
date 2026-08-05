@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from quantilica.core.exceptions import FetchError
+
 from tesouro_direto_fetcher.downloader import get_download_info
 
 

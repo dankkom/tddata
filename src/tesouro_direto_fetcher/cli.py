@@ -41,7 +41,10 @@ def _resolve_dataset_ids(name: str) -> list[str]:
 async def _run_download(args, show_progress: bool = True):
     for dataset_id in _resolve_dataset_ids(args.dataset):
         await downloader.download(
-            args.output, dataset_id=dataset_id, show_progress=show_progress
+            args.output,
+            dataset_id=dataset_id,
+            workers=args.workers,
+            show_progress=show_progress,
         )
 
 
@@ -215,6 +218,12 @@ def get_parser() -> argparse.ArgumentParser:
         help="Dataset to download (default: all)",
     )
     sync_parser.add_argument(
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of concurrent downloads (default: 4)",
+    )
+    sync_parser.add_argument(
         "--dry-run",
         dest="dry_run",
         action="store_true",
@@ -253,6 +262,12 @@ def get_parser() -> argparse.ArgumentParser:
             choices=DATASET_CHOICES,
             default="all",
             help="Dataset to download (default: all)",
+        )
+        pipeline_parser.add_argument(
+            "--workers",
+            type=int,
+            default=4,
+            help="Number of concurrent downloads (default: 4)",
         )
         pipeline_parser.set_defaults(func=cmd_pipeline)
     except ImportError:

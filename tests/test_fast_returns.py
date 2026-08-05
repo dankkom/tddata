@@ -15,6 +15,7 @@ if not _HAS_ANALYSIS:
 
 import polars as pl
 import pytest
+
 from tesouro_direto_fetcher import analytics, fast_returns
 from tesouro_direto_fetcher.constants import Column as C
 
