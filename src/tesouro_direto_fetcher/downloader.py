@@ -150,59 +150,58 @@ async def download(
         from quantilica.core.cli import make_download_progress
 
         console = get_console()
-        progress = make_download_progress(console)
         sem = asyncio.Semaphore(workers)
 
-        async def _download_file(res: RemoteResource) -> dict | None:
-            dest = repo.dataset_path(dataset_id, res.filename)
+        with make_download_progress(console=console) as progress:
+            async def _download_file(res: RemoteResource) -> dict | None:
+                dest = repo.dataset_path(dataset_id, res.filename)
 
-            if res.size > 0:
-                slug = res.filename.partition("@")[0]
-                latest = repo.get_latest_stamped_file(dataset_id, slug, "csv")
-                if latest is not None and latest.stat().st_size == res.size:
-                    logger.debug(f"Skipping {res.filename}: matching local copy")
+                if res.size > 0:
+                    slug = res.filename.partition("@")[0]
+                    latest = repo.get_latest_stamped_file(dataset_id, slug, "csv")
+                    if latest is not None and latest.stat().st_size == res.size:
+                        logger.debug(f"Skipping {res.filename}: matching local copy")
+                        return None
+
+                task_id = progress.add_task(f"[cyan]{res.name}", total=res.size or None)
+
+                last_seen = 0
+
+                def _on_progress(downloaded: int, total: int) -> None:
+                    nonlocal last_seen
+                    kwargs = {"advance": downloaded - last_seen}
+                    if total:
+                        kwargs["total"] = total
+                    progress.update(task_id, **kwargs)
+                    last_seen = downloaded
+
+                try:
+                    async with sem:
+                        await client.download_with_manifest(
+                            res.url,
+                            dest,
+                            source_id=SOURCE_ID,
+                            dataset_id=dataset_id,
+                            producer="tesouro-direto-fetcher",
+                            progress=_on_progress,
+                        )
+                    return {
+                        "url": res.url,
+                        "filename": res.filename,
+                        "destination": dest,
+                        "file_size": dest.stat().st_size,
+                    }
+                except Exception as exc:
+                    logger.error(f"Failed to download {res.url}: {exc}")
+                    if dest.exists():
+                        try:
+                            dest.unlink()
+                        except OSError:
+                            pass
                     return None
+                finally:
+                    progress.update(task_id, visible=False)
 
-            task_id = progress.add_task(f"[cyan]{res.name}", total=res.size or None)
-
-            last_seen = 0
-
-            def _on_progress(downloaded: int, total: int) -> None:
-                nonlocal last_seen
-                kwargs = {"advance": downloaded - last_seen}
-                if total:
-                    kwargs["total"] = total
-                progress.update(task_id, **kwargs)
-                last_seen = downloaded
-
-            try:
-                async with sem:
-                    await client.download_with_manifest(
-                        res.url,
-                        dest,
-                        source_id=SOURCE_ID,
-                        dataset_id=dataset_id,
-                        producer="tesouro-direto-fetcher",
-                        progress=_on_progress,
-                    )
-                return {
-                    "url": res.url,
-                    "filename": res.filename,
-                    "destination": dest,
-                    "file_size": dest.stat().st_size,
-                }
-            except Exception as exc:
-                logger.error(f"Failed to download {res.url}: {exc}")
-                if dest.exists():
-                    try:
-                        dest.unlink()
-                    except OSError:
-                        pass
-                return None
-            finally:
-                progress.update(task_id, visible=False)
-
-        with Live(progress, console=console, refresh_per_second=10):
             tasks = [_download_file(r) for r in remote]
             results = await asyncio.gather(*tasks)
             return [r for r in results if r is not None]
