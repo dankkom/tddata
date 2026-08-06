@@ -10,8 +10,7 @@ from quantilica.core.logging import log_step
 from quantilica.core.progress import batch_progress
 
 try:
-    from quantilica.core.cli import get_console, make_batch_progress
-    from rich.live import Live
+    from quantilica.core.cli import get_console
 
     _RICH_AVAILABLE = True
 except (ModuleNotFoundError, ImportError):
@@ -153,6 +152,10 @@ async def download(
         sem = asyncio.Semaphore(workers)
 
         with make_download_progress(console=console) as progress:
+            worker_task_ids = [
+                progress.add_task("[dim]Inativo[/dim]", total=1) for _ in range(workers)
+            ]
+            available_tasks = worker_task_ids.copy()
 
             async def _download_file(res: RemoteResource) -> dict | None:
                 dest = repo.dataset_path(dataset_id, res.filename)
@@ -164,20 +167,26 @@ async def download(
                         logger.debug(f"Skipping {res.filename}: matching local copy")
                         return None
 
-                task_id = progress.add_task(f"[cyan]{res.name}", total=res.size or None)
-
-                last_seen = 0
-
-                def _on_progress(downloaded: int, total: int) -> None:
-                    nonlocal last_seen
-                    kwargs = {"advance": downloaded - last_seen}
-                    if total:
-                        kwargs["total"] = total
-                    progress.update(task_id, **kwargs)
-                    last_seen = downloaded
-
+                task_id = None
                 try:
                     async with sem:
+                        task_id = available_tasks.pop(0)
+
+                        progress.update(
+                            task_id,
+                            description=f"[cyan]{res.name}",
+                            completed=0,
+                            total=res.size or None,
+                        )
+
+                        def _on_progress(downloaded: int, total: int) -> None:
+                            if downloaded == 0 and total == 0:
+                                progress.update(task_id, completed=0)
+                                return
+                            progress.update(
+                                task_id, completed=downloaded, total=total or None
+                            )
+
                         await client.download_with_manifest(
                             res.url,
                             dest,
@@ -201,7 +210,14 @@ async def download(
                             pass
                     return None
                 finally:
-                    pass
+                    if task_id is not None:
+                        progress.update(
+                            task_id,
+                            description="[dim]Inativo[/dim]",
+                            completed=0,
+                            total=1,
+                        )
+                        available_tasks.append(task_id)
 
             tasks = [_download_file(r) for r in remote]
             results = await asyncio.gather(*tasks)
