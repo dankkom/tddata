@@ -1,17 +1,17 @@
 """Functions to download Tesouro Direto's historical data"""
 
+import concurrent.futures
+import threading
 from pathlib import Path
 
 import quantilica.core.metadata as core_meta
 from quantilica.core.exceptions import FetchError
 from quantilica.core.fetcher import RemoteResource, download_resources
-from quantilica.core.http import BROWSER_HEADERS, AsyncHttpClient
+from quantilica.core.http import BROWSER_HEADERS, HttpClient, ProgressCallback
 from quantilica.core.logging import log_step
 from quantilica.core.progress import batch_progress
 
 try:
-    from quantilica.core.cli import get_console
-
     _RICH_AVAILABLE = True
 except (ModuleNotFoundError, ImportError):
     _RICH_AVAILABLE = False
@@ -23,24 +23,24 @@ from .storage import DataRepository
 SOURCE_ID = "tesouro-direto"
 CATALOG_DATASET_ID = "tesouro-direto-venda"
 
-client = AsyncHttpClient(timeout=60.0, headers=BROWSER_HEADERS)
+client = HttpClient(timeout=60.0, headers=BROWSER_HEADERS)
 
 
-async def get_dataset_resources(dataset_id: str) -> list[dict]:
-    """Fetch resources metadata from CKAN dataset asynchronously."""
+def get_dataset_resources(dataset_id: str) -> list[dict]:
+    """Fetch resources metadata from CKAN dataset."""
     params = {"id": dataset_id}
-    data = await client.get_json(CKAN_API_URL, params=params)
+    data = client.get_json(CKAN_API_URL, params=params)
     if not data["success"]:
         raise FetchError(f"CKAN API failed: {data.get('error')}")
     return data["result"]["resources"]
 
 
-async def get_download_info(dest_dir: Path, dataset_id: str) -> list[dict]:
+def get_download_info(dest_dir: Path, dataset_id: str) -> list[dict]:
     """Describe what ``download(dest_dir, dataset_id)`` would do (no IO)."""
     repo = DataRepository(dest_dir)
 
     try:
-        resources = await get_dataset_resources(dataset_id)
+        resources = get_dataset_resources(dataset_id)
     except Exception as e:
         raise FetchError(f"Error fetching resources for {dataset_id}: {e}") from e
 
@@ -77,6 +77,7 @@ async def get_download_info(dest_dir: Path, dataset_id: str) -> list[dict]:
                 "format": resource.get("format", ""),
                 "would_download": would_download,
                 "latest_local": str(latest_file) if latest_file else None,
+                "resource": resource,
             }
         )
 
@@ -108,7 +109,48 @@ def _to_remote_resources(
     return result
 
 
-async def download(
+def download_file(
+    res: RemoteResource,
+    dataset_id: str,
+    repo: DataRepository,
+    *,
+    progress: ProgressCallback | None = None,
+) -> dict | None:
+    dest = repo.dataset_path(dataset_id, res.filename)
+
+    if res.size > 0:
+        slug = res.filename.partition("@")[0]
+        latest = repo.get_latest_stamped_file(dataset_id, slug, "csv")
+        if latest is not None and latest.stat().st_size == res.size:
+            logger.debug(f"Skipping {res.filename}: matching local copy")
+            return None
+
+    try:
+        client.download_with_manifest(
+            res.url,
+            dest,
+            source_id=SOURCE_ID,
+            dataset_id=dataset_id,
+            producer="tesouro-direto-fetcher",
+            progress=progress,
+        )
+        return {
+            "url": res.url,
+            "filename": res.filename,
+            "destination": dest,
+            "file_size": dest.stat().st_size,
+        }
+    except Exception as exc:
+        logger.error(f"Failed to download {res.url}: {exc}")
+        if dest.exists():
+            try:
+                dest.unlink()
+            except OSError:
+                pass
+        return None
+
+
+def download(
     dest_dir: Path,
     dataset_id: str,
     workers: int = 4,
@@ -118,7 +160,7 @@ async def download(
     repo = DataRepository(dest_dir)
 
     try:
-        resources = await get_dataset_resources(dataset_id)
+        resources = get_dataset_resources(dataset_id)
     except Exception as e:
         logger.error(f"Error fetching resources for {dataset_id}: {e}")
         return []
@@ -132,7 +174,7 @@ async def download(
     if not show_progress:
         with log_step(logger, "download-dataset", dataset_id=dataset_id):
             logger.info(f"Found {len(remote)} files. Starting download...")
-            return await download_resources(
+            return download_resources(
                 remote,
                 repo,
                 dataset_id,
@@ -143,103 +185,23 @@ async def download(
                 logger=logger,
             )
 
-    if _RICH_AVAILABLE:
-        import asyncio
+    results = []
+    lock = threading.Lock()
 
-        from quantilica.core.cli import make_download_progress
+    def _worker(res: RemoteResource):
+        result = download_file(res, dataset_id, repo)
+        if result:
+            with lock:
+                results.append(result)
+        return result
 
-        console = get_console()
-        sem = asyncio.Semaphore(workers)
-
-        with make_download_progress(console=console) as progress:
-            worker_task_ids = [
-                progress.add_task("[dim]Inativo[/dim]", total=1) for _ in range(workers)
-            ]
-            available_tasks = worker_task_ids.copy()
-
-            async def _download_file(res: RemoteResource) -> dict | None:
-                dest = repo.dataset_path(dataset_id, res.filename)
-
-                if res.size > 0:
-                    slug = res.filename.partition("@")[0]
-                    latest = repo.get_latest_stamped_file(dataset_id, slug, "csv")
-                    if latest is not None and latest.stat().st_size == res.size:
-                        logger.debug(f"Skipping {res.filename}: matching local copy")
-                        return None
-
-                task_id = None
-                try:
-                    async with sem:
-                        task_id = available_tasks.pop(0)
-
-                        progress.update(
-                            task_id,
-                            description=f"[cyan]{res.name}",
-                            completed=0,
-                            total=res.size or None,
-                        )
-
-                        def _on_progress(downloaded: int, total: int) -> None:
-                            if downloaded == 0 and total == 0:
-                                progress.update(task_id, completed=0)
-                                return
-                            progress.update(
-                                task_id, completed=downloaded, total=total or None
-                            )
-
-                        await client.download_with_manifest(
-                            res.url,
-                            dest,
-                            source_id=SOURCE_ID,
-                            dataset_id=dataset_id,
-                            producer="tesouro-direto-fetcher",
-                            progress=_on_progress,
-                        )
-                    return {
-                        "url": res.url,
-                        "filename": res.filename,
-                        "destination": dest,
-                        "file_size": dest.stat().st_size,
-                    }
-                except Exception as exc:
-                    logger.error(f"Failed to download {res.url}: {exc}")
-                    if dest.exists():
-                        try:
-                            dest.unlink()
-                        except OSError:
-                            pass
-                    return None
-                finally:
-                    if task_id is not None:
-                        progress.update(
-                            task_id,
-                            description="[dim]Inativo[/dim]",
-                            completed=0,
-                            total=1,
-                        )
-                        available_tasks.append(task_id)
-
-            tasks = [_download_file(r) for r in remote]
-            results = await asyncio.gather(*tasks)
-            return [r for r in results if r is not None]
-
-    # Fallback to tqdm if rich is not available
     with batch_progress(dataset_id, total=len(remote)) as pbar:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = [executor.submit(_worker, r) for r in remote]
+            for _future in concurrent.futures.as_completed(futures):
+                pbar.update(1)
 
-        def _on_file_done_tqdm(result: dict | None) -> None:
-            pbar.update(1)
-
-        return await download_resources(
-            remote,
-            repo,
-            dataset_id,
-            client,
-            source_id=SOURCE_ID,
-            producer="tesouro-direto-fetcher",
-            max_concurrency=workers,
-            logger=logger,
-            on_file_done=_on_file_done_tqdm,
-        )
+    return results
 
 
 def generate_catalog(

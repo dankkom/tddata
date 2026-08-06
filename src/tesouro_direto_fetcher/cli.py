@@ -1,7 +1,6 @@
 """Command-line interface for tesouro-direto-fetcher."""
 
 import argparse
-import asyncio
 import logging
 import sys
 from pathlib import Path
@@ -38,9 +37,9 @@ def _resolve_dataset_ids(name: str) -> list[str]:
     return [DATASET_MAP[name]]
 
 
-async def _run_download(args, show_progress: bool = True):
+def _run_download(args, show_progress: bool = True):
     for dataset_id in _resolve_dataset_ids(args.dataset):
-        await downloader.download(
+        downloader.download(
             args.output,
             dataset_id=dataset_id,
             workers=args.workers,
@@ -83,7 +82,7 @@ def _print_info_list(info_list: list[dict]) -> tuple[int, int]:
     return total_size, would_download_count
 
 
-async def _run_dry_run(args):
+def _run_dry_run(args):
     logger.info(f"Fetching download info for {args.dataset}...")
 
     if args.dataset == "all":
@@ -94,9 +93,7 @@ async def _run_dry_run(args):
         for ds_name in DATASET_MAP:
             ds_id = DATASET_MAP[ds_name]
             print(f"\nDataset: {ds_name}")
-            info_list = await downloader.get_download_info(
-                args.output, dataset_id=ds_id
-            )
+            info_list = downloader.get_download_info(args.output, dataset_id=ds_id)
             total_size, would_download = _print_info_list(info_list)
             grand_total_size += total_size
             grand_would_download += would_download
@@ -110,14 +107,14 @@ async def _run_dry_run(args):
         return
 
     dataset_id = DATASET_MAP[args.dataset]
-    info_list = await downloader.get_download_info(args.output, dataset_id=dataset_id)
+    info_list = downloader.get_download_info(args.output, dataset_id=dataset_id)
     _print_info_list(info_list)
 
 
 def cmd_sync(args) -> None:
     if args.dry_run:
         try:
-            asyncio.run(_run_dry_run(args))
+            _run_dry_run(args)
         except KeyboardInterrupt:
             logger.warning("Cancelado.")
         except Exception as exc:
@@ -125,7 +122,7 @@ def cmd_sync(args) -> None:
         return
 
     try:
-        asyncio.run(_run_download(args, show_progress=not args.verbose))
+        _run_download(args, show_progress=not args.verbose)
     except KeyboardInterrupt:
         logger.warning("Download cancelled.")
 
@@ -172,7 +169,7 @@ def cmd_convert(args) -> int:
 def cmd_pipeline(args) -> int:
     logger.info("=== Passo 1/2: sincronização ===")
     try:
-        asyncio.run(_run_download(args, show_progress=not args.verbose))
+        _run_download(args, show_progress=not args.verbose)
     except KeyboardInterrupt:
         logger.warning("Download cancelled.")
         return 1

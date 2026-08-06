@@ -5,12 +5,21 @@
 
 from __future__ import annotations
 
-import asyncio
+import concurrent.futures
 from pathlib import Path
 from typing import Annotated
 
 import typer
-from quantilica.core.cli import get_console, setup_rich_logging
+from quantilica.core.cli import (
+    ProgressPool,
+    get_console,
+    graceful_executor,
+    make_batch_progress,
+    make_download_progress,
+    setup_rich_logging,
+)
+from rich.console import Group
+from rich.live import Live
 from rich.rule import Rule
 from rich.table import Table
 
@@ -23,6 +32,7 @@ from tesouro_direto_fetcher.constants import (
     DATASET_PRICES_RATES,
     DATASET_SALES,
 )
+from tesouro_direto_fetcher.storage import DataRepository
 
 app = typer.Typer(help="Dados do Tesouro Direto (preços, taxas, operações).")
 
@@ -96,39 +106,78 @@ def cmd_sync(
         raise typer.Exit(1)
 
     if dry_run:
-
-        async def _dry() -> None:
-            if dataset == "all":
-                for ds_name, ds_id in _DATASET_MAP.items():
-                    console.rule(
-                        f"[bold cyan]{ds_name}[/bold cyan]",
-                        style="cyan dim",
-                    )
-                    info_list = await downloader.get_download_info(
-                        output, dataset_id=ds_id
-                    )
-                    _print_info(info_list)
-            else:
-                info_list = await downloader.get_download_info(
-                    output, dataset_id=_DATASET_MAP[dataset]
+        if dataset == "all":
+            for ds_name, ds_id in _DATASET_MAP.items():
+                console.rule(
+                    f"[bold cyan]{ds_name}[/bold cyan]",
+                    style="cyan dim",
                 )
+                info_list = downloader.get_download_info(output, dataset_id=ds_id)
                 _print_info(info_list)
-
-        asyncio.run(_dry())
+        else:
+            info_list = downloader.get_download_info(
+                output, dataset_id=_DATASET_MAP[dataset]
+            )
+            _print_info(info_list)
         return
 
-    async def _run() -> None:
-        for dataset_id in _resolve_ids(dataset):
-            await downloader.download(output, dataset_id=dataset_id, workers=workers)
+    repo = DataRepository(output)
+    entries = []
 
-    try:
-        asyncio.run(_run())
-    except KeyboardInterrupt:
-        console.print("[yellow]Download cancelado.[/yellow]")
-        raise typer.Exit(code=130) from None
+    for dataset_id in _resolve_ids(dataset):
+        try:
+            resources = downloader.get_dataset_resources(dataset_id)
+            remote_res = downloader._to_remote_resources(resources, repo)
+            for r in remote_res:
+                entries.append((dataset_id, r))
+        except Exception as exc:
+            console.print(f"[red]Erro obtendo recursos para {dataset_id}: {exc}[/red]")
+            continue
+
+    total = len(entries)
+    if total == 0:
+        console.print("[yellow]Nenhum recurso encontrado.[/yellow]")
+        return
+
+    overall = make_batch_progress(console)
+    file_prog = make_download_progress(console)
+    overall_task = overall.add_task("[cyan]Baixando...[/cyan]", total=total)
+
+    downloaded = 0
+    errors: list[tuple[str, str]] = []
+    pool = ProgressPool(workers=workers, file_prog=file_prog)
+
+    def _worker(item: tuple[str, downloader.RemoteResource]) -> bool:
+        ds_id, res = item
+        try:
+            with pool.acquire(description=f"[cyan]{res.name}[/cyan]") as cb:
+                result = downloader.download_file(res, ds_id, repo, progress=cb)
+                return result is not None
+        except Exception as exc:
+            errors.append((res.name, str(exc)))
+            return False
+
+    with graceful_executor(max_workers=workers) as executor:
+        try:
+            with Live(
+                Group(overall, file_prog), console=console, refresh_per_second=10
+            ):
+                futures = {executor.submit(_worker, item): item for item in entries}
+                for future in concurrent.futures.as_completed(futures):
+                    overall.update(overall_task, advance=1)
+                    if future.result():
+                        downloaded += 1
+        except KeyboardInterrupt:
+            console.print("\n[yellow]Interrompido.[/yellow]")
+            raise typer.Exit(130) from None
+
     console.print(
-        f"[green]✓[/green] [bold]{dataset}[/bold] sincronizado em [dim]{output}[/dim]"
+        f"\n[green]Concluído:[/green] {downloaded}/{total} arquivo(s) baixado(s)."
     )
+    if errors:
+        console.print(f"[red]{len(errors)} erro(s):[/red]")
+        for eid, emsg in errors:
+            console.print(f"  {eid}: {emsg}")
 
 
 @app.command("convert")
@@ -148,7 +197,6 @@ def _convert_dir(data_dir: Path) -> None:
     """Converter os CSVs mais recentes de ``data_dir`` para Parquet."""
     try:
         from tesouro_direto_fetcher import converter
-        from tesouro_direto_fetcher.storage import DataRepository
     except ImportError:
         console.print(
             "[red]Erro:[/red] convert requer extras de análise:"
@@ -195,15 +243,48 @@ def cmd_pipeline(
 
     console.print(Rule("[bold]Passo 1/2: Sincronização[/bold]"))
 
-    async def _run() -> None:
-        for dataset_id in _resolve_ids(dataset):
-            await downloader.download(output, dataset_id=dataset_id, workers=workers)
+    repo = DataRepository(output)
+    entries = []
 
-    try:
-        asyncio.run(_run())
-    except KeyboardInterrupt:
-        console.print("[yellow]Download cancelado.[/yellow]")
-        raise typer.Exit(code=130) from None
+    for dataset_id in _resolve_ids(dataset):
+        try:
+            resources = downloader.get_dataset_resources(dataset_id)
+            remote_res = downloader._to_remote_resources(resources, repo)
+            for r in remote_res:
+                entries.append((dataset_id, r))
+        except Exception as exc:
+            console.print(f"[red]Erro obtendo recursos para {dataset_id}: {exc}[/red]")
+            continue
+
+    total = len(entries)
+    if total > 0:
+        overall = make_batch_progress(console)
+        file_prog = make_download_progress(console)
+        overall_task = overall.add_task("[cyan]Baixando...[/cyan]", total=total)
+
+        pool = ProgressPool(workers=workers, file_prog=file_prog)
+
+        def _worker(item: tuple[str, downloader.RemoteResource]) -> bool:
+            ds_id, res = item
+            try:
+                with pool.acquire(description=f"[cyan]{res.name}[/cyan]") as cb:
+                    result = downloader.download_file(res, ds_id, repo, progress=cb)
+                    return result is not None
+            except Exception:
+                return False
+
+        with graceful_executor(max_workers=workers) as executor:
+            try:
+                with Live(
+                    Group(overall, file_prog), console=console, refresh_per_second=10
+                ):
+                    futures = {executor.submit(_worker, item): item for item in entries}
+                    for _future in concurrent.futures.as_completed(futures):
+                        overall.update(overall_task, advance=1)
+            except KeyboardInterrupt:
+                console.print("\n[yellow]Interrompido.[/yellow]")
+                raise typer.Exit(130) from None
+
     console.print("[green]✓[/green] Sincronização concluída.")
 
     console.print(Rule("[bold]Passo 2/2: Conversão[/bold]"))
