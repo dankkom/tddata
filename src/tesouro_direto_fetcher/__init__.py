@@ -8,7 +8,6 @@ except PackageNotFoundError:
     __version__ = "0.0.0"
 logger = get_logger(__name__)
 
-from . import downloader  # noqa: E402  (must follow `logger` definition)
 from .constants import (  # noqa: E402
     AccountStatus,
     BondType,
@@ -32,7 +31,6 @@ except ImportError:
 
 __all__ = [
     "__version__",
-    "downloader",
     "Column",
     "BondType",
     "OperationType",

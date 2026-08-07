@@ -27,6 +27,18 @@ class DataRepository(StampedDataRepository):
         """Return the absolute path of ``filename`` under ``dataset_id``."""
         return self.dataset_path(dataset_id, filename)
 
+    def path_for_entry(self, entry: dict, last_modified: dt.date | None = None) -> Path:
+        """Calculate the destination path for a given entry."""
+        last_mod_str = None
+        if last_modified:
+            last_mod_str = last_modified.isoformat()
+        elif "ckan_resource" in entry:
+            r = entry["ckan_resource"]
+            last_mod_str = r.get("last_modified") or r.get("created")
+            
+        filename = self.generate_filename(entry["id"], last_mod_str)
+        return self.dataset_path(entry["group"], filename)
+
     @staticmethod
     def generate_filename(name: str, last_modified: str | None = None) -> str:
         """Return ``<slug>@<YYYYMMDDTHHMMSS>.csv`` for a CKAN resource.
