@@ -35,7 +35,7 @@ class DataRepository(StampedDataRepository):
         elif "ckan_resource" in entry:
             r = entry["ckan_resource"]
             last_mod_str = r.get("last_modified") or r.get("created")
-            
+
         filename = self.generate_filename(entry["id"], last_mod_str)
         return self.dataset_path(entry["group"], filename)
 

@@ -8,14 +8,15 @@ from .plugin import app
 
 
 def main(argv: list[str] | None = None) -> None:
-    # We still configure basic cli logging, but the new UI setup in plugin will handle rich logging.
+    # We still configure basic cli logging, but the new UI setup in
+    # plugin will handle rich logging.
     configure_cli_logging(verbose=False)
-    
+
     # Typer apps usually read sys.argv by themselves if argv is not provided
     # However, if argv is provided (e.g. in tests), we need to handle it.
     if argv is None:
         argv = sys.argv[1:]
-        
+
     try:
         # typer apps can be called directly
         app(argv)
