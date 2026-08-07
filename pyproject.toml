@@ -1,6 +1,6 @@
 [project]
 name = "tesouro-direto-fetcher"
-version = "3.1.2"
+version = "3.2.0"
 description = "Easly download & read brazilian Tesouro Direto's data"
 readme = "README.md"
 authors = [
@@ -22,8 +22,6 @@ classifiers = [
 ]
 dependencies = [
     "quantilica-core>=0.4.0",
-    "quantilica-cli>=0.2.0",
-    "quantilica-catalog>=0.2.0",
     "tqdm>=4.67.1",
 ]
 
