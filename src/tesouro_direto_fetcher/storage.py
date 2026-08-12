@@ -16,19 +16,46 @@ class DataRepository(StampedDataRepository):
     """Tesouro Direto data store using the ``<dataset_id>/`` layout."""
 
     def list_datasets(self) -> list[str]:
-        """Alias for ``list_dataset_ids`` to match CLI usage."""
+        """Alias for ``list_dataset_ids`` to match CLI usage.
+
+        Returns:
+            list[str]: A list of dataset IDs available in the repository.
+        """
         return self.list_dataset_ids()
 
     def get_all_latest_files(self, dataset_id: str) -> list[Path]:
-        """Alias for ``get_all_latest_stamped_files`` to match CLI usage."""
+        """Alias for ``get_all_latest_stamped_files`` to match CLI usage.
+
+        Args:
+            dataset_id (str): The ID of the dataset to retrieve files for.
+
+        Returns:
+            list[Path]: A list of paths to the latest files for the given dataset.
+        """
         return self.get_all_latest_stamped_files(dataset_id)
 
     def file_path(self, dataset_id: str, filename: str) -> Path:
-        """Return the absolute path of ``filename`` under ``dataset_id``."""
+        """Return the absolute path of ``filename`` under ``dataset_id``.
+
+        Args:
+            dataset_id (str): The ID of the dataset.
+            filename (str): The name of the file.
+
+        Returns:
+            Path: The absolute path to the file.
+        """
         return self.dataset_path(dataset_id, filename)
 
     def path_for_entry(self, entry: dict, last_modified: dt.date | None = None) -> Path:
-        """Calculate the destination path for a given entry."""
+        """Calculate the destination path for a given entry.
+
+        Args:
+            entry (dict): The dataset entry metadata.
+            last_modified (dt.date | None, optional): The last modified date. Defaults to None.
+
+        Returns:
+            Path: The destination path for the entry.
+        """
         last_mod_str = None
         if last_modified:
             last_mod_str = last_modified.isoformat()
@@ -45,6 +72,13 @@ class DataRepository(StampedDataRepository):
 
         Returns ``<slug>.csv`` (no stamp) when ``last_modified`` is absent or
         unparseable, rather than inventing a timestamp.
+
+        Args:
+            name (str): The base name of the resource.
+            last_modified (str | None, optional): ISO formatted last modified string. Defaults to None.
+
+        Returns:
+            str: The generated filename.
         """
         name_slug = slugify(name)
         timestamp: dt.datetime | None = None

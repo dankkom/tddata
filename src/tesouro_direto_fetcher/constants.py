@@ -89,7 +89,12 @@ class OperationType(enum.Enum):
     DEPOSIT = "D"
 
     @classmethod
-    def get_labels(cls):
+    def get_labels(cls) -> dict[str, str]:
+        """Get a mapping from operation type values to their human-readable labels.
+
+        Returns:
+            dict[str, str]: Dictionary mapping values to labels.
+        """
         return {
             cls.BUY.value: "Compra",
             cls.SELL.value: "Venda",
@@ -105,7 +110,12 @@ class Channel(enum.Enum):
     HOMEBROKER = "H"
 
     @classmethod
-    def get_labels(cls):
+    def get_labels(cls) -> dict[str, str]:
+        """Get a mapping from channel type values to their human-readable labels.
+
+        Returns:
+            dict[str, str]: Dictionary mapping values to labels.
+        """
         return {
             cls.SITE.value: "Site",
             cls.HOMEBROKER.value: "Homebroker",
@@ -135,7 +145,12 @@ class Gender(enum.Enum):
     NOT_APPLICABLE = "N"
 
     @classmethod
-    def get_labels(cls):
+    def get_labels(cls) -> dict[str, str]:
+        """Get a mapping from gender values to their human-readable labels.
+
+        Returns:
+            dict[str, str]: Dictionary mapping values to labels.
+        """
         return {
             cls.MALE.value: "Masculino",
             cls.FEMALE.value: "Feminino",
@@ -150,7 +165,12 @@ class AccountStatus(enum.Enum):
     DEACTIVATED = "D"
 
     @classmethod
-    def get_labels(cls):
+    def get_labels(cls) -> dict[str, str]:
+        """Get a mapping from account status values to their human-readable labels.
+
+        Returns:
+            dict[str, str]: Dictionary mapping values to labels.
+        """
         return {
             cls.ACTIVE.value: "Ativo",
             cls.DEACTIVATED.value: "Desativado",
@@ -164,7 +184,12 @@ class TradedLast12Months(enum.Enum):
     NO = "N"
 
     @classmethod
-    def get_labels(cls):
+    def get_labels(cls) -> dict[str, str]:
+        """Get a mapping from traded last 12 months values to their human-readable labels.
+
+        Returns:
+            dict[str, str]: Dictionary mapping values to labels.
+        """
         return {
             cls.YES.value: "Sim",
             cls.NO.value: "Não",
@@ -215,7 +240,14 @@ RENDA_MATURITY_YEAR_STEP = 5
 
 
 def is_renda_maturity(maturity_date: date) -> bool:
-    """Whether a final maturity date matches the RendA+ pattern (see NTNB1_CODE)."""
+    """Whether a final maturity date matches the RendA+ pattern (see NTNB1_CODE).
+
+    Args:
+        maturity_date (date): The maturity date to check.
+
+    Returns:
+        bool: True if it matches the RendA+ pattern, False otherwise.
+    """
     return (
         maturity_date.month == 12
         and maturity_date.day == 15

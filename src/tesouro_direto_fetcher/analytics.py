@@ -12,7 +12,15 @@ from .constants import Column as C
 
 
 def aggregate_stock(data: pl.DataFrame, by_bond_type: bool = True) -> pl.DataFrame:
-    """Aggregate stock value by month and optionally bond type."""
+    """Aggregate stock value by month and optionally bond type.
+
+    Args:
+        data (pl.DataFrame): DataFrame with stock data.
+        by_bond_type (bool, optional): Whether to group by bond type. Defaults to True.
+
+    Returns:
+        pl.DataFrame: Aggregated stock DataFrame.
+    """
     if by_bond_type:
         return (
             data.group_by([C.STOCK_MONTH.value, C.BOND_TYPE.value])
@@ -27,7 +35,15 @@ def aggregate_stock(data: pl.DataFrame, by_bond_type: bool = True) -> pl.DataFra
 
 
 def prepare_prices(data: pl.DataFrame, bond_type: str) -> pl.DataFrame:
-    """Filter and sort prices data for plotting."""
+    """Filter and sort prices data for plotting.
+
+    Args:
+        data (pl.DataFrame): DataFrame with prices data.
+        bond_type (str): The bond type to filter by.
+
+    Returns:
+        pl.DataFrame: Filtered and sorted prices DataFrame.
+    """
     return data.filter(
         (pl.col(C.BOND_TYPE.value) == bond_type)
         & (pl.col(C.BUY_PRICE.value) > 0)
@@ -40,7 +56,13 @@ def prepare_demographics_counts(
 ) -> pl.DataFrame:
     """Get value counts for demographics data with human readable labels.
 
-    Returns a DataFrame with columns: [column_name, count] sorted by count descending.
+    Args:
+        data (pl.DataFrame): DataFrame with demographics data.
+        column (str): The column to get counts for.
+        top_n (int, optional): Number of top results to return. Defaults to 15.
+
+    Returns:
+        pl.DataFrame: A DataFrame with columns: [column_name, count] sorted by count descending.
     """
     df = data.clone()
 
@@ -65,7 +87,14 @@ def prepare_demographics_counts(
 
 
 def prepare_population_pyramid(data: pl.DataFrame) -> pl.DataFrame:
-    """Prepare data for population pyramid (age bins x gender)."""
+    """Prepare data for population pyramid (age bins x gender).
+
+    Args:
+        data (pl.DataFrame): DataFrame with investor data including age and gender.
+
+    Returns:
+        pl.DataFrame: DataFrame pivoted for population pyramid plotting.
+    """
     df = data.clone()
 
     # Deduplicate by investor ID to avoid counting same investor multiple times
@@ -141,8 +170,11 @@ def aggregate_new_investors(data: pl.DataFrame, freq: str = "1mo") -> pl.DataFra
     """Resample new investors data by frequency.
 
     Args:
-        data: DataFrame with join_date column
-        freq: Frequency string for grouping. Use '1mo' for monthly, '1w' for weekly, etc.
+        data (pl.DataFrame): DataFrame with join_date column.
+        freq (str, optional): Frequency string for grouping. Use '1mo' for monthly, '1w' for weekly, etc. Defaults to '1mo'.
+
+    Returns:
+        pl.DataFrame: Aggregated new investors DataFrame.
     """
     df = data.clone()
 
@@ -163,7 +195,15 @@ def aggregate_new_investors(data: pl.DataFrame, freq: str = "1mo") -> pl.DataFra
 
 
 def aggregate_operations(data: pl.DataFrame, by_type: bool = True) -> pl.DataFrame:
-    """Aggregate operations by month and optionally type."""
+    """Aggregate operations by month and optionally type.
+
+    Args:
+        data (pl.DataFrame): DataFrame with operations data.
+        by_type (bool, optional): Whether to split by operation type. Defaults to True.
+
+    Returns:
+        pl.DataFrame: Aggregated operations DataFrame.
+    """
     df = data.with_columns(
         pl.col(C.OPERATION_DATE.value).dt.truncate("1mo").alias("month")
     )
@@ -191,11 +231,14 @@ def aggregate_value_over_time(
     """Generic aggregation of value over time.
 
     Args:
-        data: DataFrame containing the date and value columns
-        date_col: Name of the date column
-        value_col: Name of the value column to aggregate
-        group_col: Optional column to group by alongside the time period
-        freq: Frequency string for grouping (e.g., '1mo' for monthly, '6mo' for semiannual)
+        data (pl.DataFrame): DataFrame containing the date and value columns.
+        date_col (str): Name of the date column.
+        value_col (str): Name of the value column to aggregate.
+        group_col (str | None, optional): Optional column to group by alongside the time period. Defaults to None.
+        freq (str, optional): Frequency string for grouping (e.g., '1mo' for monthly, '6mo' for semiannual). Defaults to '1mo'.
+
+    Returns:
+        pl.DataFrame: Aggregated value over time DataFrame.
     """
     df = data.clone()
 
@@ -268,7 +311,15 @@ def calculate_operations_returns(
     """Calculate returns for each buy operation with FIFO matching for sells.
 
     Handles partial sells by splitting lots into closed and open positions.
-    Returns a DataFrame with one row per lot (closed or open).
+
+    Args:
+        operations (pl.DataFrame): DataFrame with operations.
+        prices (pl.DataFrame): DataFrame with prices.
+        current_date (date | None, optional): Date to calculate returns up to. Defaults to None.
+        coupons (pl.DataFrame | None, optional): DataFrame with coupons. Defaults to None.
+
+    Returns:
+        pl.DataFrame: A DataFrame with one row per lot (closed or open).
     """
     if operations.height == 0:
         return pl.DataFrame()
@@ -512,17 +563,17 @@ def calculate_portfolio_monthly_returns(
 ) -> pl.DataFrame:
     """Calculate monthly portfolio returns using Modified Dietz method.
 
-    Returns DataFrame with columns: month, monthly_return, cumulative_return,
-    portfolio_value, net_cash_flow.
-
     Args:
-        operations: Operations DataFrame
-        prices: Prices DataFrame
-        start_date: Optional start date for calculation period
-        end_date: Optional end date for calculation period
-        coupons: Optional coupons DataFrame
-        price_lookup: Optional pre-built price lookup dict for performance
-        coupon_lookup: Optional pre-built coupon lookup dict for performance
+        operations (pl.DataFrame): Operations DataFrame.
+        prices (pl.DataFrame): Prices DataFrame.
+        start_date (date | None, optional): Optional start date for calculation period. Defaults to None.
+        end_date (date | None, optional): Optional end date for calculation period. Defaults to None.
+        coupons (pl.DataFrame | None, optional): Optional coupons DataFrame. Defaults to None.
+        price_lookup (dict | None, optional): Optional pre-built price lookup dict for performance. Defaults to None.
+        coupon_lookup (dict | None, optional): Optional pre-built coupon lookup dict for performance. Defaults to None.
+
+    Returns:
+        pl.DataFrame: DataFrame with columns: month, monthly_return, cumulative_return, portfolio_value, net_cash_flow.
     """
     if operations.height == 0 or prices.height == 0:
         return pl.DataFrame()

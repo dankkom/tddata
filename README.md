@@ -1,8 +1,10 @@
-# tesouro-direto-fetcher: Download, análise e visualização do Tesouro Direto
+# tesouro-direto-fetcher
 
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square) ![Python](https://img.shields.io/badge/python-3.12+-blue.svg?style=flat-square) [![Tests](https://github.com/Quantilica/tesouro-direto-fetcher/actions/workflows/run-tests.yml/badge.svg)](https://github.com/Quantilica/tesouro-direto-fetcher/actions/workflows/run-tests.yml)
 
 Biblioteca Python para download, leitura e visualização de dados históricos do Tesouro Direto via API CKAN (Tesouro Transparente). Fornece leitores especializados por tipo de dataset e gráficos prontos com Altair.
+
+Para a documentação completa, visite [https://docs.quantilica.com](https://docs.quantilica.com).
 
 ## Instalação
 

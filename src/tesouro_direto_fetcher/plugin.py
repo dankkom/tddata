@@ -50,6 +50,14 @@ GROUP_ALIASES = {
 
 
 def list_datasets(group: str) -> list[dict[str, Any]]:
+    """Fetch the list of datasets for a given group from the CKAN API.
+
+    Args:
+        group (str): The dataset group ID to query.
+
+    Returns:
+        list[dict[str, Any]]: A list of dataset dictionaries containing their metadata.
+    """
     from quantilica.core.http import HttpClient
 
     from tesouro_direto_fetcher.constants import CKAN_API_URL
@@ -83,6 +91,16 @@ def list_datasets(group: str) -> list[dict[str, Any]]:
 def path_builder(
     output_dir: Path, entry: dict[str, Any], last_modified: dt.date | None
 ) -> Path:
+    """Build the destination path for a given dataset entry.
+
+    Args:
+        output_dir (Path): The base output directory.
+        entry (dict[str, Any]): The dataset entry metadata.
+        last_modified (dt.date | None): The last modified date.
+
+    Returns:
+        Path: The constructed output path.
+    """
     return DataRepository(output_dir).path_for_entry(entry, last_modified=last_modified)
 
 

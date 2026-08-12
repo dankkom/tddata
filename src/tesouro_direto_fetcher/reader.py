@@ -121,7 +121,15 @@ def _read_and_process_csv(
 def read_prices(
     filepath: Path, chunksize: int | None = None
 ) -> pl.DataFrame | Iterator[pl.DataFrame]:
-    """Read bond prices and rates (Taxas e Preços dos Títulos)."""
+    """Read bond prices and rates (Taxas e Preços dos Títulos).
+
+    Args:
+        filepath (Path): Path to the CSV file.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+
+    Returns:
+        pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
+    """
     column_mapping = {
         "Data Base": C.REFERENCE_DATE.value,
         "Tipo Titulo": C.BOND_TYPE.value,
@@ -153,7 +161,15 @@ def read_prices(
 def read_stock(
     filepath: Path, chunksize: int | None = None
 ) -> pl.DataFrame | Iterator[pl.DataFrame]:
-    """Read bond stock (Estoque)."""
+    """Read bond stock (Estoque).
+
+    Args:
+        filepath (Path): Path to the CSV file.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+
+    Returns:
+        pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
+    """
     column_mapping = {
         "Tipo Titulo": C.BOND_TYPE.value,
         "Vencimento do Titulo": C.MATURITY_DATE.value,
@@ -182,7 +198,15 @@ def read_stock(
 def read_investors(
     filepath: Path, chunksize: int | None = None
 ) -> pl.DataFrame | Iterator[pl.DataFrame]:
-    """Read investors data (Investidores)."""
+    """Read investors data (Investidores).
+
+    Args:
+        filepath (Path): Path to the CSV file.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+
+    Returns:
+        pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
+    """
     column_mapping = {
         "Codigo do Investidor": C.INVESTOR_ID.value,
         "Data de Adesao": C.JOIN_DATE.value,
@@ -235,7 +259,15 @@ def read_investors(
 def read_operations(
     filepath: Path, chunksize: int | None = None
 ) -> pl.DataFrame | Iterator[pl.DataFrame]:
-    """Read operations data (Operações)."""
+    """Read operations data (Operações).
+
+    Args:
+        filepath (Path): Path to the CSV file.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+
+    Returns:
+        pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
+    """
     column_mapping = {
         "Codigo do Investidor": C.INVESTOR_ID.value,
         "Data da Operacao": C.OPERATION_DATE.value,
@@ -277,7 +309,15 @@ def read_operations(
 def read_sales(
     filepath: Path, chunksize: int | None = None
 ) -> pl.DataFrame | Iterator[pl.DataFrame]:
-    """Read sales data (Vendas)."""
+    """Read sales data (Vendas).
+
+    Args:
+        filepath (Path): Path to the CSV file.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+
+    Returns:
+        pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
+    """
     column_mapping = {
         "Tipo Titulo": C.BOND_TYPE.value,
         "Vencimento do Titulo": C.MATURITY_DATE.value,
@@ -307,7 +347,15 @@ def read_sales(
 def read_buybacks(
     filepath: Path, chunksize: int | None = None
 ) -> pl.DataFrame | Iterator[pl.DataFrame]:
-    """Read buybacks data (Resgates)."""
+    """Read buybacks data (Resgates).
+
+    Args:
+        filepath (Path): Path to the CSV file.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+
+    Returns:
+        pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
+    """
     column_mapping = {
         "Tipo Titulo": C.BOND_TYPE.value,
         "Vencimento do Titulo": C.MATURITY_DATE.value,
@@ -335,7 +383,15 @@ def read_buybacks(
 def read_maturities(
     filepath: Path, chunksize: int | None = None
 ) -> pl.DataFrame | Iterator[pl.DataFrame]:
-    """Read maturities data (Vencimentos)."""
+    """Read maturities data (Vencimentos).
+
+    Args:
+        filepath (Path): Path to the CSV file.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+
+    Returns:
+        pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
+    """
     column_mapping = {
         "Tipo Titulo": C.BOND_TYPE.value,
         "Vencimento do Titulo": C.MATURITY_DATE.value,

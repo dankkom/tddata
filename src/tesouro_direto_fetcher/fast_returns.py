@@ -157,9 +157,16 @@ def calculate_monthly_returns_bulk(
     ``analytics.calculate_portfolio_monthly_returns`` once per investor (or
     once per investor and bond type when ``by_bond_type`` is True).
 
-    Returns a DataFrame with columns ``investor_id`` (+ ``bond_type``),
-    ``month``, ``monthly_return``, ``cumulative_return``, ``portfolio_value``
-    and ``net_cash_flow``, sorted by group and month.
+    Args:
+        operations (pl.DataFrame): Operations DataFrame.
+        prices (pl.DataFrame): Prices DataFrame.
+        coupons (pl.DataFrame | None, optional): Optional coupons DataFrame. Defaults to None.
+        by_bond_type (bool, optional): Whether to group returns by bond type. Defaults to False.
+
+    Returns:
+        pl.DataFrame: A DataFrame with columns ``investor_id`` (+ ``bond_type``),
+        ``month``, ``monthly_return``, ``cumulative_return``, ``portfolio_value``
+        and ``net_cash_flow``, sorted by group and month.
     """
     gkeys = [_INV, _BT] if by_bond_type else [_INV]
     out_schema: dict[str, pl.DataType] = {
@@ -347,8 +354,15 @@ def calculate_lots_bulk(
     with a sell interval is a closed lot, and the unmatched tail of each buy
     interval is an open lot.
 
-    Returns one row per lot with the same metric columns as the legacy
-    function, plus ``investor_id``.
+    Args:
+        operations (pl.DataFrame): Operations DataFrame.
+        prices (pl.DataFrame): Prices DataFrame.
+        coupons (pl.DataFrame | None, optional): Optional coupons DataFrame. Defaults to None.
+        current_date (date | None, optional): Date to calculate returns up to. Defaults to None.
+
+    Returns:
+        pl.DataFrame: One row per lot with the same metric columns as the legacy
+        function, plus ``investor_id``.
     """
     if operations.height == 0:
         return pl.DataFrame()
