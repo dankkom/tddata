@@ -125,7 +125,8 @@ def read_prices(
 
     Args:
         filepath (Path): Path to the CSV file.
-        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a
+            time. Defaults to None.
 
     Returns:
         pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
@@ -165,7 +166,8 @@ def read_stock(
 
     Args:
         filepath (Path): Path to the CSV file.
-        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a
+            time. Defaults to None.
 
     Returns:
         pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
@@ -202,7 +204,8 @@ def read_investors(
 
     Args:
         filepath (Path): Path to the CSV file.
-        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a
+            time. Defaults to None.
 
     Returns:
         pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
@@ -263,7 +266,8 @@ def read_operations(
 
     Args:
         filepath (Path): Path to the CSV file.
-        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a
+            time. Defaults to None.
 
     Returns:
         pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
@@ -313,7 +317,8 @@ def read_sales(
 
     Args:
         filepath (Path): Path to the CSV file.
-        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a
+            time. Defaults to None.
 
     Returns:
         pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
@@ -351,7 +356,8 @@ def read_buybacks(
 
     Args:
         filepath (Path): Path to the CSV file.
-        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a
+            time. Defaults to None.
 
     Returns:
         pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
@@ -387,7 +393,8 @@ def read_maturities(
 
     Args:
         filepath (Path): Path to the CSV file.
-        chunksize (int | None, optional): Number of lines to read from the CSV file at a time. Defaults to None.
+        chunksize (int | None, optional): Number of lines to read from the CSV file at a
+            time. Defaults to None.
 
     Returns:
         pl.DataFrame | Iterator[pl.DataFrame]: DataFrame or an iterator of DataFrames.
@@ -430,6 +437,7 @@ def read_interest_coupons(
         chunksize: Number of lines to read from the CSV file at a time.
 
     Returns:
-        pl.DataFrame or Iterator[pl.DataFrame]: DataFrame with columns similar to `read_maturities`.
+        pl.DataFrame or Iterator[pl.DataFrame]: DataFrame with columns similar to
+            `read_maturities`.
     """
     return read_maturities(filepath, chunksize=chunksize)

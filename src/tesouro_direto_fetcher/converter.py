@@ -14,7 +14,8 @@ def convert_to_parquet(
 
     Args:
         csv_path: Path to the source CSV file.
-        parquet_path: Path for the output Parquet file. If None, uses the same stem as CSV.
+        parquet_path: Path for the output Parquet file. If None, uses the same stem as
+            CSV.
         dataset_type: Type of dataset to select the correct reader.
                       If 'infer', tries to guess based on filename/content.
                       Options: 'prices', 'stock', 'investors', 'operations',

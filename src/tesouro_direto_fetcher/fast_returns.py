@@ -160,8 +160,10 @@ def calculate_monthly_returns_bulk(
     Args:
         operations (pl.DataFrame): Operations DataFrame.
         prices (pl.DataFrame): Prices DataFrame.
-        coupons (pl.DataFrame | None, optional): Optional coupons DataFrame. Defaults to None.
-        by_bond_type (bool, optional): Whether to group returns by bond type. Defaults to False.
+        coupons (pl.DataFrame | None, optional): Optional coupons DataFrame. Defaults to
+            None.
+        by_bond_type (bool, optional): Whether to group returns by bond type. Defaults
+            to False.
 
     Returns:
         pl.DataFrame: A DataFrame with columns ``investor_id`` (+ ``bond_type``),
@@ -357,8 +359,10 @@ def calculate_lots_bulk(
     Args:
         operations (pl.DataFrame): Operations DataFrame.
         prices (pl.DataFrame): Prices DataFrame.
-        coupons (pl.DataFrame | None, optional): Optional coupons DataFrame. Defaults to None.
-        current_date (date | None, optional): Date to calculate returns up to. Defaults to None.
+        coupons (pl.DataFrame | None, optional): Optional coupons DataFrame. Defaults to
+            None.
+        current_date (date | None, optional): Date to calculate returns up to. Defaults
+            to None.
 
     Returns:
         pl.DataFrame: One row per lot with the same metric columns as the legacy

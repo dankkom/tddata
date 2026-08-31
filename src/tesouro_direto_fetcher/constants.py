@@ -185,7 +185,8 @@ class TradedLast12Months(enum.Enum):
 
     @classmethod
     def get_labels(cls) -> dict[str, str]:
-        """Get a mapping from traded last 12 months values to their human-readable labels.
+        """Get a mapping from traded last 12 months values to their human-readable
+            labels.
 
         Returns:
             dict[str, str]: Dictionary mapping values to labels.

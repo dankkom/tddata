@@ -62,7 +62,8 @@ def prepare_demographics_counts(
         top_n (int, optional): Number of top results to return. Defaults to 15.
 
     Returns:
-        pl.DataFrame: A DataFrame with columns: [column_name, count] sorted by count descending.
+        pl.DataFrame: A DataFrame with columns: [column_name, count] sorted by count
+            descending.
     """
     df = data.clone()
 
@@ -119,7 +120,7 @@ def prepare_population_pyramid(data: pl.DataFrame) -> pl.DataFrame:
     # Create age groups using cut
     # Polars doesn't have cut, so we'll do it manually with when/then
     age_group_expr = pl.lit(None)
-    for i, (start, end) in enumerate(zip(bins[:-1], bins[1:])):
+    for i, (start, end) in enumerate(zip(bins[:-1], bins[1:], strict=False)):
         age_group_expr = (
             pl.when((pl.col(C.AGE.value) >= start) & (pl.col(C.AGE.value) < end))
             .then(pl.lit(labels[i]))
@@ -171,7 +172,8 @@ def aggregate_new_investors(data: pl.DataFrame, freq: str = "1mo") -> pl.DataFra
 
     Args:
         data (pl.DataFrame): DataFrame with join_date column.
-        freq (str, optional): Frequency string for grouping. Use '1mo' for monthly, '1w' for weekly, etc. Defaults to '1mo'.
+        freq (str, optional): Frequency string for grouping. Use '1mo' for monthly, '1w'
+            for weekly, etc. Defaults to '1mo'.
 
     Returns:
         pl.DataFrame: Aggregated new investors DataFrame.
@@ -234,8 +236,10 @@ def aggregate_value_over_time(
         data (pl.DataFrame): DataFrame containing the date and value columns.
         date_col (str): Name of the date column.
         value_col (str): Name of the value column to aggregate.
-        group_col (str | None, optional): Optional column to group by alongside the time period. Defaults to None.
-        freq (str, optional): Frequency string for grouping (e.g., '1mo' for monthly, '6mo' for semiannual). Defaults to '1mo'.
+        group_col (str | None, optional): Optional column to group by alongside the time
+            period. Defaults to None.
+        freq (str, optional): Frequency string for grouping (e.g., '1mo' for monthly,
+            '6mo' for semiannual). Defaults to '1mo'.
 
     Returns:
         pl.DataFrame: Aggregated value over time DataFrame.
@@ -253,7 +257,8 @@ def aggregate_value_over_time(
             )
         return df.group_by("month").agg(pl.col(value_col).sum()).sort("month")
 
-    # For other frequencies (e.g., '6mo'), use group_by_dynamic which requires sorted input
+    # For other frequencies (e.g., '6mo'), use group_by_dynamic which
+    # requires sorted input
     # Ensure the date column is sorted
     if date_col in df.columns:
         df = df.sort(date_col)
@@ -315,8 +320,10 @@ def calculate_operations_returns(
     Args:
         operations (pl.DataFrame): DataFrame with operations.
         prices (pl.DataFrame): DataFrame with prices.
-        current_date (date | None, optional): Date to calculate returns up to. Defaults to None.
-        coupons (pl.DataFrame | None, optional): DataFrame with coupons. Defaults to None.
+        current_date (date | None, optional): Date to calculate returns up to. Defaults
+            to None.
+        coupons (pl.DataFrame | None, optional): DataFrame with coupons. Defaults to
+            None.
 
     Returns:
         pl.DataFrame: A DataFrame with one row per lot (closed or open).
@@ -374,7 +381,8 @@ def calculate_operations_returns(
         else:
             rec["_maturity_date_key"] = mat
 
-    # Build FIFO index: (bond_type, maturity_date) -> [buy_record_indices sorted by date]
+    # Build FIFO index: (bond_type, maturity_date) -> [buy_record_indices
+    # sorted by date]
     buy_index = {}
     for idx, rec in enumerate(buy_records):
         key = (rec[C.BOND_TYPE.value], rec["_maturity_date_key"])
@@ -566,14 +574,20 @@ def calculate_portfolio_monthly_returns(
     Args:
         operations (pl.DataFrame): Operations DataFrame.
         prices (pl.DataFrame): Prices DataFrame.
-        start_date (date | None, optional): Optional start date for calculation period. Defaults to None.
-        end_date (date | None, optional): Optional end date for calculation period. Defaults to None.
-        coupons (pl.DataFrame | None, optional): Optional coupons DataFrame. Defaults to None.
-        price_lookup (dict | None, optional): Optional pre-built price lookup dict for performance. Defaults to None.
-        coupon_lookup (dict | None, optional): Optional pre-built coupon lookup dict for performance. Defaults to None.
+        start_date (date | None, optional): Optional start date for calculation period.
+            Defaults to None.
+        end_date (date | None, optional): Optional end date for calculation period.
+            Defaults to None.
+        coupons (pl.DataFrame | None, optional): Optional coupons DataFrame. Defaults to
+            None.
+        price_lookup (dict | None, optional): Optional pre-built price lookup dict for
+            performance. Defaults to None.
+        coupon_lookup (dict | None, optional): Optional pre-built coupon lookup dict for
+            performance. Defaults to None.
 
     Returns:
-        pl.DataFrame: DataFrame with columns: month, monthly_return, cumulative_return, portfolio_value, net_cash_flow.
+        pl.DataFrame: DataFrame with columns: month, monthly_return, cumulative_return,
+            portfolio_value, net_cash_flow.
     """
     if operations.height == 0 or prices.height == 0:
         return pl.DataFrame()
@@ -598,7 +612,8 @@ def calculate_portfolio_monthly_returns(
 
     # Build efficient price lookup if not provided
     if price_lookup is None:
-        # Use optimized nested dict structure: {bond_type: {maturity_date: {ref_date: price}}}
+        # Use optimized nested dict structure:
+        # {bond_type: {maturity_date: {ref_date: price}}}
         price_lookup = {}
         for row in prices.iter_rows(named=True):
             bond_type = row[C.BOND_TYPE.value]
@@ -724,7 +739,7 @@ def calculate_portfolio_monthly_returns(
                         coupon_income += positions[key]["quantity"] * unit_cpn
             else:
                 # Use pre-built coupon lookup
-                for (bond_type, maturity_date), position_qty in [
+                for (bond_type, maturity_date), _position_qty in [
                     (k[0], k[1]) for k in positions.keys()
                 ]:
                     key = (bond_type, maturity_date)

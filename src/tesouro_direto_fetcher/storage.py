@@ -51,7 +51,8 @@ class DataRepository(StampedDataRepository):
 
         Args:
             entry (dict): The dataset entry metadata.
-            last_modified (dt.date | None, optional): The last modified date. Defaults to None.
+            last_modified (dt.date | None, optional): The last modified date. Defaults
+                to None.
 
         Returns:
             Path: The destination path for the entry.
@@ -75,7 +76,8 @@ class DataRepository(StampedDataRepository):
 
         Args:
             name (str): The base name of the resource.
-            last_modified (str | None, optional): ISO formatted last modified string. Defaults to None.
+            last_modified (str | None, optional): ISO formatted last modified string.
+                Defaults to None.
 
         Returns:
             str: The generated filename.
